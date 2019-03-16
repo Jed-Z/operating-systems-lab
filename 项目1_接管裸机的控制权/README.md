@@ -321,7 +321,7 @@
 
 
 
-## 参考文献
+## 参考资料
 
 1. [Linux dd命令 | 菜鸟教程](http://www.runoob.com/linux/linux-comm-dd.html)
 2. [软盘_百度百科](https://baike.baidu.com/item/软盘/963560)
