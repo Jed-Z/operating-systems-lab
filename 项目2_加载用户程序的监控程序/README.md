@@ -1,9 +1,5 @@
 # 实验项目2：加载用户程序的监控程序
 
-2019-03-15
-
-
-
 ## 实验题目
 
 加载用户程序的监控程序
@@ -88,7 +84,7 @@
 
 各程序执行的流程图：
 
-![flowchart](C:\Users\Jed\Desktop\flowchart.png)
+![flowchart](assets/flowchart.png)
 
 
 
@@ -143,25 +139,25 @@
 
    * stone_topleft.img
 
-     ![1552625507750](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552625507750.png)
+     ![1552625507750](assets/1552625507750.png)
 
      
 
    * stone_topright.img
 
-     ![1552625533434](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552625533434.png)
+     ![1552625533434](assets/1552625533434.png)
 
      
 
    * stone_bottomleft.img
 
-     ![1552478996468](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552478996468.png)
+     ![1552478996468](assets/1552478996468.png)
 
      
 
    * stone_bottomright.img
 
-     ![1552625555420](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552625555420.png)
+     ![1552625555420](assets/1552625555420.png)
 
      
 
@@ -386,13 +382,13 @@ echo "[+] ${output_file} generated successfully."
 
 在 WSL 中运行以上脚本，生成软盘镜像文件。
 
-![1552626677030](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552626677030.png)
+![1552626677030](assets/1552626677030.png)
 
 
 
 此时，本项目目录中已经有了这些文件：
 
-![1552626559519](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552626559519.png)
+![1552626559519](assets/1552626559519.png)
 
 
 
@@ -402,7 +398,7 @@ echo "[+] ${output_file} generated successfully."
 
 1. 加载`JedOS_v1.0.img`到 VMware 中。
 
-   ![1552626741275](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552626741275.png)
+   ![1552626741275](assets/1552626741275.png)
 
    
 
@@ -410,37 +406,37 @@ echo "[+] ${output_file} generated successfully."
 
 3. 引导完成后，将自动跳转至监控程序，如图所示：
 
-   ![1552626893982](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552626893982.png)
+   ![1552626893982](assets/1552626893982.png)
 
    
 
 4. 根据提示，可以按下键盘上的1、2、3、4这四个按钮来跳转到相应的监控程序。此时，按下数字1，进入用户程序1。
 
-   ![1552626947654](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552626947654.png)
+   ![1552626947654](assets/1552626947654.png)
 
    
 
 5. 按下 ESC 键，立即返回监控程序页面。
 
-   ![1552626977256](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552626977256.png)
+   ![1552626977256](assets/1552626977256.png)
 
    
 
 6. 按下数字2，进入用户程序2：
 
-   ![1552627004777](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552627004777.png)
+   ![1552627004777](assets/1552627004777.png)
 
    
 
 7. 按下 ESC，返回监控程序。再按下数字3，进入用户程序3：
 
-   ![1552627055247](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552627055247.png)
+   ![1552627055247](assets/1552627055247.png)
 
    
 
 8. 按下 ESC，返回监控程序。再按下数字4，进入用户程序4：
 
-   ![1552627081929](C:\Users\Jed\AppData\Roaming\Typora\typora-user-images\1552627081929.png)
+   ![1552627081929](assets/1552627081929.png)
 
 
 
