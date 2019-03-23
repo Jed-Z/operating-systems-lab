@@ -18,5 +18,3 @@ Keyboard:
     jne Keyboard     ; 无效按键，重新等待用户按键
     call dword shell ; 进入命令行界面
     jmp Keyboard     ; 无限循环
-
-DataArea:
