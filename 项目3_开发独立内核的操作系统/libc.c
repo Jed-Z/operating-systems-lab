@@ -6,16 +6,11 @@
  */
 #include "stringio.h"
 #define BUFLEN 16
+#define NEWLINE putchar('\r');putchar('\n')
 
 extern void loadAndRun(uint8_t start, uint8_t len, uint16_t target);
 extern void clearScreen();
-
-struct UsrProgInfo {
-    uint16_t pid;      // 用户程序编号
-    char* name;        // 程序名
-    uint16_t size;     // 程序大小（字节）
-    uint16_t section;  // 在软盘中的扇区数
-};
+extern void poweroff();
 
 /* 系统启动界面 */
 void startUp() {
@@ -44,22 +39,39 @@ void showHelp() {
     "\r\n"
     "    help - show information about builtin commands\r\n"
     "    clear - clear the terminal screen\r\n"
-    "    list - show a list of user programmes\r\n"
-    "    run 1 - run user programme 1\r\n"
-    "    run 2 - run user programme 2\r\n"
-    "    run 3 - run user programme 3\r\n"
-    "    run 4 - run user programme 4\r\n"
+    "    list - show a list of user programmes and their PIDs\r\n"
+    "    run <PID> - run a user programme according to PID, e.g. `run 1`\r\n"
+    "    poweroff - force shutdown the machine\r\n"
     ;
     print(help_msg);
 }
 
+/* 显示用户程序信息 */
+void listUsrProg() {
+    char* hint = "You can use `run <PID>` to run a user programme.\r\n";
+    char* list_head =
+        "PID -        Name       - Size -  Addr   -  Sector\r\n";
+    char* list_msg[] = {
+        " 1  - stone_topleft     -  1KB - 0xA300  -   10",
+        " 2  - stone_topright    -  1KB - 0xA700  -   12",
+        " 3  - stone_bottomleft  -  1KB - 0xAB00  -   14",
+        " 4  - stone_bottomright -  1KB - 0xAF00  -   16",
+    };
+    print(hint);
+    print(list_head);
+    for(int i = 0, len = sizeof(list_msg)/sizeof(list_msg[0]); i < len; i++) {
+        print(list_msg[i]);
+        NEWLINE;
+    }
+}
 /* 操作系统shell */
 void shell() {
     clearScreen();
     showHelp();
     
     char buf[BUFLEN] = {0};
-    char* commands[] = {"help", "clear", "list", "run 1", "run 2", "run 3", "run 4"};
+    char* commands[] = {"help", "clear", "list", "run 1", "run 2", "run 3", "run 4", "poweroff"};
+
 
     while(1) {
         promptString();
@@ -71,7 +83,7 @@ void shell() {
             clearScreen();
         }
         else if(strcmp(buf, commands[2]) == 0) {
-            //?????????????????
+            listUsrProg();
         }
         else if(strcmp(buf, commands[3]) == 0) {
             loadAndRun(10, 2, 0xA300);
@@ -88,6 +100,9 @@ void shell() {
         else if(strcmp(buf, commands[6]) == 0) {
             loadAndRun(16, 2, 0xAF00);
             clearScreen();
+        }
+        else if(strcmp(buf, commands[7]) == 0) {
+            poweroff();            
         }
         else {
             if(buf[0] != '\0') {

@@ -9,10 +9,11 @@ BITS 16
 [global printInPos]
 [global putchar]
 [global getch]
+[global poweroff]
 
 [extern tempc]
 
-loadAndRun:                ; 函数：从软盘中读取扇区到内存
+loadAndRun:                ; 函数：从软盘中读取扇区到内存并运行用户程序
     pusha
     mov bp, sp
     add bp, 16+4           ; 参数地址
@@ -26,7 +27,7 @@ loadAndRun:                ; 函数：从软盘中读取扇区到内存
     mov ch,0               ; 柱面号; 起始编号为0
     mov cl,[bp]            ; 起始扇区号 ; 起始编号为1
     int 13H                ; 调用读磁盘BIOS的13h功能
-    call dword pushCsIp    ; 用此技巧来手动压栈CS、IP
+    call dword pushCsIp    ; 用此技巧来手动压栈CS、IP; 此方法详见文档
     pushCsIp:
     mov si, sp             ; si指向栈顶
     mov word[si], afterrun ; 修改栈中IP的值，这样用户程序返回回来后就可以继续执行了
@@ -71,10 +72,15 @@ putchar:                   ; 函数：在光标处打印一个字符
     popa
     retf
 
-getch:                     ; 函数：读取一个字符（无回显）
+getch:                     ; 函数：读取一个字符到tempc（无回显）
     push ax
     mov ah, 0              ; 功能号
     int 16h                ; 读取字符，al=读到的字符
-    mov [tempc], al
+    mov [tempc], al        ; 储存到tempc
     pop ax
     retf
+
+poweroff:                  ; 函数：强制关机
+    mov ax, 2001H
+    mov dx, 1004H
+    out dx, ax
