@@ -5,7 +5,7 @@
  * @LastEditTime: 2019-03-23
  */
 #include <stdint.h>
-#define BUFLEN 16
+#define BUFLEN 6
 
 extern void clearScreen();
 extern void printInPos(char *msg, uint16_t len, uint8_t row, uint8_t col);
@@ -24,14 +24,11 @@ uint16_t strlen(char *str) {
 /* 比较字符串 */
 uint8_t strcmp(char* str1, char* str2) {
     int i = 0;
-    putchar('&');
     while (1) {
-        putchar('*');
         if(str1[i]=='\0' || str2[i]=='\0') { break; }
         if(str1[i] != str2[i]) { break; }
         ++i;
     }
-    putchar('&');
     return str1[i] - str2[i];
 }
 
@@ -44,19 +41,49 @@ void print(char* str) {
 
 /* 读取字符串到缓冲区 */
 void readToBuf(char* buffer, uint16_t maxlen) {
-    int i;
-    for(i = 0; i < maxlen; i++) {  // 不能超出最大长度
+    int i = 0;
+    while(1) {
         getch();
-        putchar(tempc);
-        if(tempc == 0xD) {  // 按下回车，停止读取
-            putchar('\n');
-            break; 
+        if(i > 0 && i < maxlen-1) { // buffer中有字符且未满
+            if(tempc == 0x0D) {
+                break;  // 按下回车，停止读取
+            }
+            else if(tempc == '\b') {  // 按下退格，则删除一个字符
+                putchar('\b');
+                putchar(' ');
+                putchar('\b');
+                --i;
+            }
+            else{
+                putchar(tempc);  // 回显
+                buffer[i] = tempc;
+                ++i;
+            }
         }
-        buffer[i] = tempc;
+        else if(i >= maxlen-1) {  // 达到最大值，只能按退格或回车
+            if(tempc == '\b') {  // 按下退格，则删除一个字符
+                putchar('\b');
+                putchar(' ');
+                putchar('\b');
+                --i;
+            }
+            else if(tempc == 0x0D) {
+                break;  // 按下回车，停止读取
+            }
+        }
+        else if(i <= 0) {  // buffer中没有字符，只能输入或回车，不能删除
+            if(tempc == 0x0D) {
+                break;  // 按下回车，停止读取
+            }
+            else if(tempc != '\b') {
+                putchar(tempc);  // 回显
+                buffer[i] = tempc;
+                ++i;
+            }
+        }
     }
-    for(; i < maxlen; i++) {
-        buffer[i] = '\0';
-    }
+    putchar('\r'); putchar('\n');
+    buffer[i] = '\0';  // 字符串必须以空字符结尾
 }
 
 /* 系统启动界面 */
@@ -81,8 +108,8 @@ void promptString() {
 /* 显示帮助信息 */
 void showHelp() {
     char *help_msg = 
-    "JedOS shell, version 1.1\r\n"
-    "This is a shell which is used for JedOS. These shell commands are defined internally. Type `help` to see this list.\r\n"
+    "Shell for JedOS, version 1.1 - on x86 PC\r\n"
+    "This is a shell which is used for JedOS. These shell commands are defined internally. Use `help` to see the list.\r\n"
     "\r\n"
     "    help - show information about builtin commands\r\n"
     "    clear - clear the terminal screen\r\n"
@@ -97,18 +124,27 @@ void showHelp() {
 
 /* 操作系统shell */
 void shell() {
-    char buf[BUFLEN] = {0};
-    char* commands[] = {"help", "clear"};
     clearScreen();
     showHelp();
+    
+    char buf[BUFLEN] = {0};
+    char* commands[] = {"help", "clear"};
+
     while(1) {
         promptString();
         readToBuf(buf, BUFLEN);
-        if(strcmp(buf, "help")) {
+        if(strcmp(buf, commands[0]) == 0) {
             showHelp();
         }
-        else{
+        else if(strcmp(buf, commands[1]) == 0) {
             clearScreen();
+        }
+        else {
+            if(buf[0] != '\0') {
+                char* error_msg = " : command not found\r\n";
+                print(buf);
+                print(error_msg);
+            }
         }
     }
 }
