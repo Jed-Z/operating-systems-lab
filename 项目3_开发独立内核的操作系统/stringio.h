@@ -2,15 +2,15 @@
  * @Author: Jed
  * @Description: 涉及字符串输入输出的C函数库
  * @Date: 2019-03-23
- * @LastEditTime: 2019-03-23
+ * @LastEditTime: 2019-03-24
  */
 #include <stdint.h>
 
 extern void printInPos(char *msg, uint16_t len, uint8_t row, uint8_t col);
 extern void putchar(char c);
-extern void getch();
+extern char getch();
 
-char tempc;  // 临时存放一个字符的地方
+// char tempc;  // 临时存放一个字符的地方
 
 /* 字符串长度 */
 uint16_t strlen(char *str) {
@@ -41,7 +41,7 @@ void print(char* str) {
 void readToBuf(char* buffer, uint16_t maxlen) {
     int i = 0;
     while(1) {
-        getch();
+        char tempc = getch();
         if(i > 0 && i < maxlen-1) { // buffer中有字符且未满
             if(tempc == 0x0D) {
                 break;  // 按下回车，停止读取

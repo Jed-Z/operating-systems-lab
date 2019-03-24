@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: C库；以C语言编写的库文件
  * @Date: 2019-03-21
- * @LastEditTime: 2019-03-23
+ * @LastEditTime: 2019-03-24
  */
 #include "stringio.h"
 #define BUFLEN 16

@@ -11,7 +11,7 @@ BITS 16
 [global getch]
 [global poweroff]
 
-[extern tempc]
+; [extern tempc]
 
 loadAndRun:                ; 函数：从软盘中读取扇区到内存并运行用户程序
     pusha
@@ -73,11 +73,12 @@ putchar:                   ; 函数：在光标处打印一个字符
     retf
 
 getch:                     ; 函数：读取一个字符到tempc（无回显）
-    push ax
+                           ; push ax
     mov ah, 0              ; 功能号
     int 16h                ; 读取字符，al=读到的字符
-    mov [tempc], al        ; 储存到tempc
-    pop ax
+    mov ah, 0              ; 为返回值做准备
+                           ; mov [tempc], al        ; 储存到tempc
+                           ; pop ax
     retf
 
 poweroff:                  ; 函数：强制关机
