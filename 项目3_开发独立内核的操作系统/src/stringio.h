@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 涉及字符串输入输出的C函数库
  * @Date: 2019-03-23
- * @LastEditTime: 2019-03-24
+ * @LastEditTime: 2019-03-25
  */
 #include <stdint.h>
 
@@ -42,6 +42,7 @@ void readToBuf(char* buffer, uint16_t maxlen) {
     int i = 0;
     while(1) {
         char tempc = getch();
+        if(!(tempc==0xD || tempc=='\b' || tempc>=32 && tempc<=127)) { continue; }  // 非有效字符不予理会
         if(i > 0 && i < maxlen-1) { // buffer中有字符且未满
             if(tempc == 0x0D) {
                 break;  // 按下回车，停止读取
@@ -82,4 +83,46 @@ void readToBuf(char* buffer, uint16_t maxlen) {
     }
     putchar('\r'); putchar('\n');
     buffer[i] = '\0';  // 字符串必须以空字符结尾
+}
+
+/* 将整数转为指定进制的字符串 */
+char* itoa(int val, int base) {
+	static char buf[32] = {0};
+	int i = 30;
+	for(; val && i ; --i, val /= base) {
+		buf[i] = "0123456789ABCDEF"[val % base];
+    }
+	return &buf[i+1];
+}
+
+/* 判断字符是否是十进制数字 */
+uint8_t isnum(char c) {
+    return c>='0' && c<='9';
+}
+
+/* 获取字符串的第一个空格前的词 */
+void getFirstWord(char* str, char* buf) {
+    int i = 0;
+    while(str[i] && str[i] != ' ') {
+        buf[i] = str[i];
+        i++;
+    }
+    buf[i] = '\0'; // 字符串必须以空字符结尾
+}
+
+/* 获取字符串的第一个空格后的词 */
+void getAfterFirstWord(char* str, char* buf) {
+    buf[0] = '\0';  // 为了应对用户故意搞破坏
+    int i = 0;
+    while(str[i] && str[i] != ' ') {
+        i++;
+    }
+    while(str[i] && str[i] == ' ') {
+        i++;
+    }
+    int j = 0;
+    while(str[i]) {
+        buf[j++] = str[i++];
+    }
+    buf[j] = '\0';  // 字符串必须以空字符结尾
 }

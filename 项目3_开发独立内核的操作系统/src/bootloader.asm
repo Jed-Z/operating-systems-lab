@@ -6,7 +6,8 @@
 BITS 16
 org 7c00h
 
-offset_oskernel equ 7E00h  ; 紧接着引导扇区后的地址（7C00h+512d）
+offset_upinfo equ 7E00h     ; 用户程序信息表被装入的位置
+offset_oskernel equ 8000h   ; 操作系统内核被装入的位置
 
 global _start
 _start:
@@ -22,7 +23,19 @@ _start:
     mov	dl, 0               ; 列号=0
     int	10h                 ; BIOS的10h功能：显示一行字符
 
-LoadOsKernel:               ; 读软盘或硬盘上的若干物理扇区到内存的ES:BX处：
+LoadUsrProgInfo:            ; 加载用户程序信息表
+    mov ax,cs               ; 段地址; 存放数据的内存基地址
+    mov es,ax               ; 设置段地址（不能直接mov es,段地址）
+    mov bx, offset_upinfo   ; 偏移地址; 存放数据的内存偏移地址
+    mov ah,2                ; 功能号
+    mov al,1                ; 扇区数
+    mov dl,0                ; 驱动器号; 软盘为0，硬盘和U盘为80H
+    mov dh,0                ; 磁头号; 起始编号为0
+    mov ch,0                ; 柱面号; 起始编号为0
+    mov cl,2                ; 起始扇区号 ; 起始编号为1
+    int 13H                 ; 调用读磁盘BIOS的13h功能
+
+LoadOsKernel:               ; 加载操作系统内核
     mov ax,cs               ; 段地址; 存放数据的内存基地址
     mov es,ax               ; 设置段地址（不能直接mov es,段地址）
     mov bx, offset_oskernel ; 偏移地址; 存放数据的内存偏移地址
@@ -31,7 +44,7 @@ LoadOsKernel:               ; 读软盘或硬盘上的若干物理扇区到内�
     mov dl,0                ; 驱动器号; 软盘为0，硬盘和U盘为80H
     mov dh,0                ; 磁头号; 起始编号为0
     mov ch,0                ; 柱面号; 起始编号为0
-    mov cl,2                ; 起始扇区号 ; 起始编号为1
+    mov cl,3                ; 起始扇区号 ; 起始编号为1
     int 13H                 ; 调用读磁盘BIOS的13h功能
 
 EnterOs:
