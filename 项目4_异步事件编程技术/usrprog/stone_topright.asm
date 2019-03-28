@@ -192,7 +192,6 @@ end:
 QuitUsrProg:
     popa
     retf
-    jmp 0A100h             ; 退出用户程序
 
 ClearScreen:               ; 函数：清屏
     pusha

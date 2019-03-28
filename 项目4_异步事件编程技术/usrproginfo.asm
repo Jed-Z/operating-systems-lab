@@ -1,12 +1,12 @@
 UsrProgNumber:
-    dw 4                     ; 用户程序数量
+    dw 5                     ; 用户程序数量
 
 UsrProg1:                    ; 每个用户程序信息占用40字节
     pid1 dw 1                ; 程序编号；相对偏移0
     name1 db 'stone_topleft' ; 程序名（至多32字节）；相对偏移2
     times 32-($-name1) db 0  ; 程序名要填满32字节
     size1 dw 1024            ; 程序大小；相对偏移34
-    sector1 dw 1            ; 起始扇区；相对偏移36
+    sector1 dw 1             ; 起始扇区；相对偏移36
     addr1 dw 0xA300          ; 内存中的地址；相对偏移38
 
 UsrProg2:
@@ -33,6 +33,13 @@ UsrProg4:
     sector4 dw 7
     addr4 dw 0xAF00          ; 内存中的地址
 
+UsrProg5:
+    pid5 dw 3
+    name5 db 'intcaller'
+    times 32-($-name5) db 0
+    size5 dw 512
+    sector5 dw 9
+    addr5 dw 0xB300          ; 内存中的地址
 
 SectorEnding:
     times 512-($-$$) db 0

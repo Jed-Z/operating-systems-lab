@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: C库；以C语言编写的库文件
  * @Date: 2019-03-21
- * @LastEditTime: 2019-03-27
+ * @LastEditTime: 2019-03-28
  */
 #include "stringio.h"
 #define BUFLEN 16
@@ -96,9 +96,14 @@ void shell() {
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // run：运行用户程序
             char pids[BUFLEN+1];
             getAfterFirstWord(cmdstr, pids);  // 获取run后的参数列表
+            uint16_t prog_num = getUsrProgNum();
             uint8_t isvalid = 1;  // 参数有效标志位
             for(int i = 0; pids[i]; i++) {  // 判断参数是有效的
                 if(!isnum(pids[i]) && pids[i]!=' ') {  // 及不是数字又不是空格，无效参数
+                    isvalid = 0;
+                    break;
+                }
+                if(isnum(pids[i]) && pids[i] > prog_num+'0') {  // 数字超过了用户程序数量，无效参数
                     isvalid = 0;
                     break;
                 }
@@ -116,7 +121,7 @@ void shell() {
                 print(hint);
             }
             else {  // 参数无效，报错，不执行任何用户程序
-                char* error_msg = "Invalid arguments. PIDs must be decimal numbers.\r\n";
+                char* error_msg = "Invalid arguments. Type `list` to see available PIDs.\r\n";
                 print(error_msg);
             }
 

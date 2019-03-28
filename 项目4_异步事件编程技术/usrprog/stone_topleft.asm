@@ -21,6 +21,13 @@ org offset_usrprog1
 
 start:
     pusha
+    mov ax, 0
+    mov ds, ax
+    push [09h*4+2]         ; 压栈原来09h号中断的IP
+    push [09h*4]           ; 压栈原来09h号中断的CS
+
+    WRITE_INT_VECTOR 09h, IntOuch
+
     call ClearScreen       ; 清屏
     mov ax,cs
     mov es,ax              ; ES = CS
@@ -185,14 +192,18 @@ skip:
 
 continue:
     jmp loop1
-
 end:
     jmp $                  ; 停止画框，无限循环
 
 QuitUsrProg:
+    mov ax, 0
+    mov ds, ax
+    mov bx, [09h*4+2]
+    mov [39h*4+2]
+    ; push [09h*4+2]         ; 压栈原来09h号中断的IP
+    ; push [09h*4]           ; 压栈原来09h号中断的CS
     popa
     retf
-    jmp 0A100h             ; 退出用户程序
 
 ClearScreen:               ; 函数：清屏
     pusha
@@ -218,5 +229,4 @@ DataArea:
     hint1 db 'User program 1 is running. Press ESC to exit.'
     hint1len equ ($-hint1)
 
-    times 1022-($-$$) db 0 ; 填充0，一直到第1022字节
-    db 55h, 0AAh           ; 扇区末尾两个字节为0x55和0xAA
+%include "interrupt/intouch.asm"
