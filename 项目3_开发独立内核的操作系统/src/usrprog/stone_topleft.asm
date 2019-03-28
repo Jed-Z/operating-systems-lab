@@ -192,7 +192,6 @@ end:
 QuitUsrProg:
     popa
     retf
-    jmp 0A100h             ; 退出用户程序
 
 ClearScreen:               ; 函数：清屏
     pusha
@@ -210,13 +209,10 @@ DataArea:
     x dw originpos_x
     y dw originpos_y
 
-    myinfo db '                             Zhang Yixin, 17341203                            '
-    infolen dw $-myinfo    ; myinfo字符串的长度
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    hint1 db 'User program 1 is running. Press ESC to exit.'
+    hint1 db 'This is user program 1. Press ESC to exit.'
     hint1len equ ($-hint1)
 
-    times 1022-($-$$) db 0 ; 填充0，一直到第1022字节
-    db 55h, 0AAh           ; 扇区末尾两个字节为0x55和0xAA
+    times 1024-($-$$) db 0

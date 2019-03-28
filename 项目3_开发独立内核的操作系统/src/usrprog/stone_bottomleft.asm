@@ -30,7 +30,7 @@ start:
     mov gs,ax              ; GS = B800h，指向文本模式的显示缓冲区
     mov byte[char],'X'
 
-    PRINT_IN_POS hint1, hint1len, 3, 30
+    PRINT_IN_POS hint1, hint1len, 16, 30
 
 initialize:                ; 多次调用用户程序时，可保证初始值是相同的
     mov word[x], originpos_x
@@ -178,6 +178,8 @@ skip:
     mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
     int 16h
     jz continue            ; 无键盘按下，继续
+    mov ah, 0              ; 功能号：查询键盘输入
+    int 16h
     cmp al, 27             ; 是否按下ESC
     je QuitUsrProg         ; 若按下ESC，退出用户程序
 
@@ -190,7 +192,6 @@ end:
 QuitUsrProg:
     popa
     retf
-    jmp 0A100h             ; 退出用户程序
 
 ClearScreen:               ; 函数：清屏
     pusha
@@ -208,13 +209,10 @@ DataArea:
     x dw originpos_x
     y dw originpos_y
 
-    myinfo db '                             Zhang Yixin, 17341203                            '
-    infolen dw $-myinfo    ; myinfo字符串的长度
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    hint1 db 'User program 3 is running. Press ESC to exit.'
+    hint1 db 'This is user program 3. Press ESC to exit.'
     hint1len equ ($-hint1)
 
-    times 1022-($-$$) db 0 ; 填充0，一直到第1022字节
-    db 55h, 0AAh           ; 扇区末尾两个字节为0x55和0xAA
+    times 1024-($-$$) db 0

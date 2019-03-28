@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 涉及字符串输入输出的C函数库
  * @Date: 2019-03-23
- * @LastEditTime: 2019-03-25
+ * @LastEditTime: 2019-03-28
  */
 #include <stdint.h>
 
@@ -87,6 +87,7 @@ void readToBuf(char* buffer, uint16_t maxlen) {
 
 /* 将整数转为指定进制的字符串 */
 char* itoa(int val, int base) {
+	if(val==0) return "0";
 	static char buf[32] = {0};
 	int i = 30;
 	for(; val && i ; --i, val /= base) {

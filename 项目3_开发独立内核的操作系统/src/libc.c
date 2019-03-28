@@ -2,19 +2,21 @@
  * @Author: Jed
  * @Description: C库；以C语言编写的库文件
  * @Date: 2019-03-21
- * @LastEditTime: 2019-03-25
+ * @LastEditTime: 2019-03-28
  */
 #include "stringio.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 
-extern void loadAndRun(uint16_t sector, uint16_t len, uint16_t addr);
+extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t addr);
 extern void clearScreen();
 extern void powerOff();
-extern uint16_t getUsrProgNum();
+extern uint8_t getUsrProgNum();
 extern char* getUsrProgName(uint16_t pid);
 extern uint16_t getUsrProgSize(uint16_t pid);
-extern uint16_t getUsrProgSector(uint16_t pid);
+extern uint8_t getUsrProgCylinder(uint16_t pid);
+extern uint8_t getUsrProgHead(uint16_t pid);
+extern uint8_t getUsrProgSector(uint16_t pid);
 extern uint16_t getUsrProgAddr(uint16_t pid);
 
 /* 系统启动界面 */
@@ -55,7 +57,7 @@ void showHelp() {
 void listUsrProg() {
     char* hint = "You can use `run <PID>` to run a user programme.\r\n";
     char* list_head =
-        "PID  -  Name  -  Size  -  Addr  -  Sector\r\n";
+        "PID  -  Name  -  Size  -  Addr  -  Cylinder  -  Head  -  Sector\r\n";
     char* separator = "  -  ";
     print(hint);
     print(list_head);
@@ -65,6 +67,8 @@ void listUsrProg() {
         print(getUsrProgName(i)); print(separator);  // 打印用户程序名
         print(itoa(getUsrProgSize(i), 10)); print(separator);  // 打印用户程序大小
         print(itoa(getUsrProgAddr(i), 16)); print(separator);  // 打印用户程序内存地址
+        print(itoa(getUsrProgCylinder(i), 10)); print(separator);  // 打印用户程序存放的柱面号
+        print(itoa(getUsrProgHead(i), 10)); print(separator);  // 打印用户程序存放的磁头号
         print(itoa(getUsrProgSector(i), 10));  // 打印用户程序存放的起始扇区
         NEWLINE;
     }
@@ -108,7 +112,7 @@ void shell() {
                 for(int i = 0; pids[i] != '\0'; i++) {
                     if(isnum(pids[i])) {  // 是数字（不是空格）
                         int pid_to_run = pids[i] - '0';  // 要运行的用户程序PID
-                        loadAndRun(getUsrProgSector(pid_to_run), getUsrProgSize(pid_to_run)/512, getUsrProgAddr(pid_to_run));
+                        loadAndRun(getUsrProgCylinder(pid_to_run), getUsrProgHead(pid_to_run), getUsrProgSector(pid_to_run), getUsrProgSize(pid_to_run)/512, getUsrProgAddr(pid_to_run));
                         clearScreen();
                     }
                 }

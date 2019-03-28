@@ -19,12 +19,12 @@ gcc -c -m16 -march=i386 -masm=intel -nostdlib -ffreestanding -mpreferred-stack-b
 ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/oskernel.o ./temp/liba.o ./temp/libc.o -o ./temp/kernel.bin
 rm ./temp/*.o
 
-dd if=./temp/bootloader.bin of=JedOS_v1.1.img bs=512 count=1
-dd if=./temp/usrproginfo.bin of=JedOS_v1.1.img bs=512 seek=1 count=1
-dd if=./temp/kernel.bin of=JedOS_v1.1.img bs=512 seek=2 count=8
-dd if=./temp/stone_topleft.bin of=JedOS_v1.1.img bs=512 seek=10 count=2
-dd if=./temp/stone_topright.bin of=JedOS_v1.1.img bs=512 seek=12 count=2
-dd if=./temp/stone_bottomleft.bin of=JedOS_v1.1.img bs=512 seek=14 count=2
-dd if=./temp/stone_bottomright.bin of=JedOS_v1.1.img bs=512 seek=16 count=2
+dd if=./temp/bootloader.bin of=JedOS_v1.1.img bs=512 count=1 2>/dev/null
+dd if=./temp/usrproginfo.bin of=JedOS_v1.1.img bs=512 seek=1 count=1 2>/dev/null
+dd if=./temp/kernel.bin of=JedOS_v1.1.img bs=512 seek=2 count=16 2>/dev/null
+dd if=./temp/stone_topleft.bin of=JedOS_v1.1.img bs=512 seek=18 count=2 2>/dev/null
+dd if=./temp/stone_topright.bin of=JedOS_v1.1.img bs=512 seek=20 count=2 2>/dev/null
+dd if=./temp/stone_bottomleft.bin of=JedOS_v1.1.img bs=512 seek=22 count=2 2>/dev/null
+dd if=./temp/stone_bottomright.bin of=JedOS_v1.1.img bs=512 seek=24 count=2 2>/dev/null
 
 echo "[+] Done."
