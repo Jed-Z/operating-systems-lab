@@ -17,7 +17,7 @@ Timer:
     mov si, hotwheel            ; 风火轮首字符地址
     add si, [wheel_offset]      ; 风火轮字符偏移量
     mov al, [si]                ; al=要显示的字符
-    mov ah, 0Ah                 ; ah=黑底，亮绿色
+    mov ah, 0Ch                 ; ah=黑底，淡红色
     mov [gs:((80*24+79)*2)], ax ; 更新显存
     inc byte[wheel_offset]      ; 递增偏移量
     cmp byte[wheel_offset], 4   ; 检查偏移量是否超过3

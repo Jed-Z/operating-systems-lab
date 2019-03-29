@@ -1,91 +1,61 @@
 IntOuch:
+    pusha
+    push ds
+    push es
+
+    mov	ax, cs           ; 置其他段寄存器值与CS相同
+    mov	ds, ax           ; 数据段
+    mov	bp, ouch_msg     ; BP=当前串的偏移地址
+    mov	ax, ds           ; ES:BP = 串地址
+    mov	es, ax           ; 置ES=DS
+    mov	cx, ouch_msg_len ; CX = 串长
+    mov	ax, 1300h        ; AH = 13h（功能号）、AL = 01h（光标不动）
+    mov	bx, 0007h        ; 页号为0(BH = 0) 黑底白字(BL = 07h)
+    mov dh, 20           ; 行号=0
+    mov	dl, 40           ; 列号=0
+    int	10h              ; BIOS的10h功能：显示一行字符
+
+    call Delay
+
+    mov	ax, cs           ; 置其他段寄存器值与CS相同
+    mov	ds, ax           ; 数据段
+    mov	bp, ouch_clear   ; BP=当前串的偏移地址
+    mov	ax, ds           ; ES:BP = 串地址
+    mov	es, ax           ; 置ES=DS
+    mov	cx, ouch_msg_len ; CX = 串长
+    mov	ax, 1300h        ; AH = 13h（功能号）、AL = 01h（光标不动）
+    mov	bx, 0007h        ; 页号为0(BH = 0) 黑底白字(BL = 07h)
+    mov dh, 20           ; 行号=0
+    mov	dl, 40           ; 列号=0
+    int	10h              ; BIOS的10h功能：显示一行字符
+
+    int 39h              ; 原来的BIOS int 09h
+
+    mov al,20h           ; AL = EOI
+    out 20h,al           ; 发送EOI到主8529A
+    out 0A0h,al          ; 发送EOI到从8529A
+
+    pop es
+    pop ds
+    popa
+    iret                 ; 从中断返回
+
+Delay:                   ; 延迟一段时间
     push ax
-    push bx
     push cx
-    push dx
-	push bp
-	push es
-	push ds
-	
-    in al, 60h
-    cmp al, 01h
-    je powerOff
+    mov ax, 580
+delay_outer:
+    mov cx, 50000
+delay_inner:
+    loop delay_inner
+    dec ax
+    cmp ax, 0
+    jne delay_outer
+    pop cx
+    pop ax
+    ret
 
-	mov ax, cs
-	mov ds, ax
-	mov es, ax
-	
-	inc byte [es:odd]
-	cmp byte [es:odd], 1
-	je print
-	mov byte [es:odd], 0
-	jmp final
-	
-print:
-    mov ah,13h 	                    ; 功能号
-	mov al,0                 		; 光标放到串尾
-	mov bl,0ah 	                    ; 亮绿
-	mov bh,0 	                	; 第0页
-	mov dh,[es:cnn] 	    ; 第 cnn 行
-	mov dl,[es:cnn]	    ; 第 cnn 列
-	mov bp,  OUCH 	        ; BP=串地址
-	mov cx,10  	                    ; 串长为 10
-	int 10h 		                ; 调用10H号中断
-    
-	call Delay
-	
-	mov ax, 0601h					;清除OUCH!OUCH!
-	mov bh, 0Fh
-	mov ch, [es:cnn]
-	mov cl, [es:cnn]
-	mov dh, [es:cnn]
-	mov dl, [es:cnn]
-	add dl, 10
-	int 10h
-	
-	inc byte [es:cnn]
-	cmp byte  [es:cnn], 25
-	jne final
-	mov byte  [es:cnn], 0
-	
-final:
-	in al,60h
 
-	mov al,20h					    ; AL = EOI
-	out 20h,al						; 发送EOI到主8529A
-	out 0A0h,al					    ; 发送EOI到从8529A
-	
-	pop ds
-	pop es
-	pop bp
-	pop dx
-	pop cx
-	pop bx
-	pop ax
-	
-	iret							; 从中断返回
-Delay:
-	push ax
-	push cx
-	
-	mov ax, 400
-loop11:
-	mov cx, 50000
-loop2:
-	loop loop2
-	dec ax
-	cmp ax, 0
-	jne loop11
-	
-	pop cx
-	pop ax
-	ret
-
-powerOff:                  ; 函数：强制关机
-    mov ax, 2001H
-    mov dx, 1004H
-    out dx, ax
-OUCH:
-    db "OUCH!OUCH!"
-	cnn db 0
-	odd db 1
+    ouch_msg db 'OUCH! OUCH!'
+    ouch_msg_len equ $-ouch_msg
+    ouch_clear db '           '

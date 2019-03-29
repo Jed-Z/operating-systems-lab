@@ -22,12 +22,12 @@ org offset_usrprog1
 start:
     pusha
     mov ax, 0
-    mov ds, ax
-    push [09h*4+2]         ; 压栈原来09h号中断的IP
-    push [09h*4]           ; 压栈原来09h号中断的CS
-
+    mov es, ax
+    mov si, [es:4*09h]     ; 以下4条指令把当前09h号中断移至39h号
+    mov [es:4*39h], si
+    mov si, [es:4*09h+2]
+    mov [es:4*39h+2], si
     WRITE_INT_VECTOR 09h, IntOuch
-
     call ClearScreen       ; 清屏
     mov ax,cs
     mov es,ax              ; ES = CS
@@ -192,16 +192,12 @@ skip:
 
 continue:
     jmp loop1
-end:
-    jmp $                  ; 停止画框，无限循环
 
 QuitUsrProg:
-    mov ax, 0
-    mov ds, ax
-    mov bx, [09h*4+2]
-    mov [39h*4+2]
-    ; push [09h*4+2]         ; 压栈原来09h号中断的IP
-    ; push [09h*4]           ; 压栈原来09h号中断的CS
+    mov si, [es:4*39h]     ; 以下4条指令恢复原来的BIOS 09h号
+    mov [es:4*09h], si
+    mov si, [es:4*39h+2]
+    mov [es:4*09h+2], si
     popa
     retf
 
@@ -221,12 +217,10 @@ DataArea:
     x dw originpos_x
     y dw originpos_y
 
-    myinfo db '                             Zhang Yixin, 17341203                            '
-    infolen dw $-myinfo    ; myinfo字符串的长度
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    hint1 db 'User program 1 is running. Press ESC to exit.'
+    hint1 db 'This is user program 1. Press ESC to exit.'
     hint1len equ ($-hint1)
 
 %include "interrupt/intouch.asm"

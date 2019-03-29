@@ -1,45 +1,24 @@
+%include "usrprog/header.asm"
+%macro UsrProgInfoBlock 7     ; 参数：(PID,程序名,字节数,柱面,磁头,扇区,内存地址)
+    pid%1 db %1               ; 程序编号PID；相对偏移0
+    name%1 db %2              ; 程序名（至多32字节）；相对偏移1
+    times 16-($-name%1) db 0  ; 程序名占6字节
+    size%1 dw %3              ; 程序大小；相对偏移17
+    cylinder%1 db %4          ; 柱面；相对偏移19
+    head%1 db %5              ; 磁头；相对偏移20
+    sector%1 db %6            ; 扇区；相对偏移21
+    addr%1 dw %7              ; 内存中的地址；相对偏移22
+%endmacro                     ; 共24个字节
+
 UsrProgNumber:
-    dw 5                     ; 用户程序数量
+    db 5                      ; 用户程序数量
 
-UsrProg1:                    ; 每个用户程序信息占用40字节
-    pid1 dw 1                ; 程序编号；相对偏移0
-    name1 db 'stone_topleft' ; 程序名（至多32字节）；相对偏移2
-    times 32-($-name1) db 0  ; 程序名要填满32字节
-    size1 dw 1024            ; 程序大小；相对偏移34
-    sector1 dw 1             ; 起始扇区；相对偏移36
-    addr1 dw 0xA300          ; 内存中的地址；相对偏移38
-
-UsrProg2:
-    pid2 dw 2
-    name2 db 'stone_topright'
-    times 32-($-name2) db 0
-    size2 dw 1024
-    sector2 dw 3
-    addr2 dw 0xA700          ; 内存中的地址
-
-UsrProg3:
-    pid3 dw 3
-    name3 db 'stone_bottomleft'
-    times 32-($-name3) db 0
-    size3 dw 1024
-    sector3 dw 5
-    addr3 dw 0xAB00          ; 内存中的地址
-
-UsrProg4:
-    pid4 dw 4
-    name4 db 'stone_bottomright'
-    times 32-($-name4) db 0
-    size4 dw 1024
-    sector4 dw 7
-    addr4 dw 0xAF00          ; 内存中的地址
-
-UsrProg5:
-    pid5 dw 3
-    name5 db 'intcaller'
-    times 32-($-name5) db 0
-    size5 dw 512
-    sector5 dw 9
-    addr5 dw 0xB300          ; 内存中的地址
+UserProgInfo:
+    UsrProgInfoBlock 1, 'stone_topleft', 1024, 0, 1, 1, offset_usrprog1
+    UsrProgInfoBlock 2, 'stone_topright', 1024, 0, 1, 3, offset_usrprog2
+    UsrProgInfoBlock 3, 'stone_botleft', 1024, 0, 1, 5, offset_usrprog3
+    UsrProgInfoBlock 4, 'stone_botright', 1024, 0, 1, 7, offset_usrprog4
+    UsrProgInfoBlock 5, 'interrupt_caller', 512, 0, 1, 9, offset_intcaller
 
 SectorEnding:
     times 512-($-$$) db 0

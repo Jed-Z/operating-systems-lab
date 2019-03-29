@@ -2,25 +2,29 @@
  * @Author: Jed
  * @Description: C库；以C语言编写的库文件
  * @Date: 2019-03-21
- * @LastEditTime: 2019-03-28
+ * @LastEditTime: 2019-03-29
  */
 #include "stringio.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 
-extern void loadAndRun(uint16_t sector, uint16_t len, uint16_t addr);
+extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t addr);
 extern void clearScreen();
 extern void powerOff();
-extern uint16_t getUsrProgNum();
+extern uint8_t getUsrProgNum();
 extern char* getUsrProgName(uint16_t pid);
 extern uint16_t getUsrProgSize(uint16_t pid);
-extern uint16_t getUsrProgSector(uint16_t pid);
+extern uint8_t getUsrProgCylinder(uint16_t pid);
+extern uint8_t getUsrProgHead(uint16_t pid);
+extern uint8_t getUsrProgSector(uint16_t pid);
 extern uint16_t getUsrProgAddr(uint16_t pid);
+
+char* initcmd = "run 1 2 3 4";
 
 /* 系统启动界面 */
 void startUp() {
     clearScreen();
-    char* title = "JedOS V1.2";
+    char* title = "JedOS V1.1";
     char* subtitle = "Zhang Yixin, 17341203";
     char* date = "2019-03-23";
     char* hint = "System is loaded successfully. Press ENTER to start shell.";
@@ -39,7 +43,7 @@ void promptString() {
 /* 显示帮助信息 */
 void showHelp() {
     char *help_msg = 
-    "Shell for JedOS, version 1.2 - on x86 PC\r\n"
+    "Shell for JedOS, version 1.1 - on x86 PC\r\n"
     "This is a shell which is used for JedOS. These shell commands are defined internally. Use `help` to see the list.\r\n"
     "\r\n"
     "    help - show information about builtin commands\r\n"
@@ -55,20 +59,27 @@ void showHelp() {
 void listUsrProg() {
     char* hint = "You can use `run <PID>` to run a user programme.\r\n";
     char* list_head =
-        "PID  -  Name  -  Size  -  Addr  -  Sector\r\n";
+        "PID  -     Name         -  Size  -  Addr - Cylinder - Head - Sector\r\n";
     char* separator = "  -  ";
     print(hint);
     print(list_head);
     uint16_t prog_num = getUsrProgNum();  // 获取用户程序数量
     for(int i = 1; i <= prog_num; i++) {
         print(itoa(i, 10)); print(separator);  // 打印PID
-        print(getUsrProgName(i)); print(separator);  // 打印用户程序名
+        print(getUsrProgName(i));
+        for(int j = 0, len = 16-strlen(getUsrProgName(i)); j < len; j++) {
+            putchar(' ');
+        }
+        print(separator);  // 打印用户程序名
         print(itoa(getUsrProgSize(i), 10)); print(separator);  // 打印用户程序大小
         print(itoa(getUsrProgAddr(i), 16)); print(separator);  // 打印用户程序内存地址
+        print(itoa(getUsrProgCylinder(i), 10)); print(separator);  // 打印用户程序存放的柱面号
+        print(itoa(getUsrProgHead(i), 10)); print(separator);  // 打印用户程序存放的磁头号
         print(itoa(getUsrProgSector(i), 10));  // 打印用户程序存放的起始扇区
         NEWLINE;
     }
 }
+
 /* 操作系统shell */
 void shell() {
     clearScreen();
@@ -96,14 +107,13 @@ void shell() {
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // run：运行用户程序
             char pids[BUFLEN+1];
             getAfterFirstWord(cmdstr, pids);  // 获取run后的参数列表
-            uint16_t prog_num = getUsrProgNum();
             uint8_t isvalid = 1;  // 参数有效标志位
             for(int i = 0; pids[i]; i++) {  // 判断参数是有效的
-                if(!isnum(pids[i]) && pids[i]!=' ') {  // 及不是数字又不是空格，无效参数
+                if(!isnum(pids[i]) && pids[i]!=' ') {  // 既不是数字又不是空格，无效参数
                     isvalid = 0;
                     break;
                 }
-                if(isnum(pids[i]) && pids[i] > prog_num+'0') {  // 数字超过了用户程序数量，无效参数
+                if(isnum(pids[i]) && pids[i]-'0'>getUsrProgNum()) {
                     isvalid = 0;
                     break;
                 }
@@ -113,7 +123,7 @@ void shell() {
                 for(int i = 0; pids[i] != '\0'; i++) {
                     if(isnum(pids[i])) {  // 是数字（不是空格）
                         int pid_to_run = pids[i] - '0';  // 要运行的用户程序PID
-                        loadAndRun(getUsrProgSector(pid_to_run), getUsrProgSize(pid_to_run)/512, getUsrProgAddr(pid_to_run));
+                        loadAndRun(getUsrProgCylinder(pid_to_run), getUsrProgHead(pid_to_run), getUsrProgSector(pid_to_run), getUsrProgSize(pid_to_run)/512, getUsrProgAddr(pid_to_run));
                         clearScreen();
                     }
                 }
@@ -121,8 +131,11 @@ void shell() {
                 print(hint);
             }
             else {  // 参数无效，报错，不执行任何用户程序
-                char* error_msg = "Invalid arguments. Type `list` to see available PIDs.\r\n";
+                char* error_msg = "Invalid arguments. PIDs must be decimal numbers and less than or equal to ";
                 print(error_msg);
+                print(itoa(getUsrProgNum(), 10));
+                putchar('.');
+                NEWLINE;
             }
 
         }

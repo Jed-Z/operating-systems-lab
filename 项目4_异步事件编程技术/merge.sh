@@ -19,7 +19,7 @@ nasm -f elf32 hotwheel.asm -o ./temp/hotwheel.o
 nasm -f elf32 osstarter.asm -o ./temp/osstarter.o
 nasm -f elf32 liba.asm -o ./temp/liba.o
 gcc -c -m16 -march=i386 -masm=intel -nostdlib -ffreestanding -mpreferred-stack-boundary=2 -lgcc -shared kernel.c -o ./temp/kernel.o
-ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/osstarter.o ./temp/kernel.o ./temp/liba.o ./temp/hotwheel.o -o ./temp/kernel.bin
+ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/osstarter.o ./temp/liba.o ./temp/kernel.o ./temp/hotwheel.o -o ./temp/kernel.bin
 rm ./temp/*.o
 
 dd if=./temp/bootloader.bin of=JedOS_v1.2.img bs=512 count=1 2> /dev/null

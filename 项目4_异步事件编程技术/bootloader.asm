@@ -40,7 +40,7 @@ LoadOsKernel:               ; 加载操作系统内核
     mov es,ax               ; 设置段地址（不能直接mov es,段地址）
     mov bx, offset_oskernel ; 偏移地址; 存放数据的内存偏移地址
     mov ah,2                ; 功能号
-    mov al,8                ; 扇区数（为内核预留8个扇区2~9号，共4KB）
+    mov al,16               ; 扇区数
     mov dl,0                ; 驱动器号; 软盘为0，硬盘和U盘为80H
     mov dh,0                ; 磁头号; 起始编号为0
     mov ch,0                ; 柱面号; 起始编号为0
