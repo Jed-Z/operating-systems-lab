@@ -17,6 +17,12 @@ BITS 16
 [global getUsrProgSector]
 [global getUsrProgAddr]
 [global loadAndRun]
+[global getDateYear]
+[global getDateMonth]
+[global getDateDay]
+[global getDateHour]
+[global getDateMinute]
+[global getDateSecond]
 
 offset_upinfo equ 7E00h    ; 用户程序信息表被装入的位置
 
@@ -214,4 +220,49 @@ loadAndRun:                ; 函数：从软盘中读取扇区到内存并运行
     jmp [bp+16]
     afterrun:
     popa
+    retf
+
+
+getDateYear:;函数：从CMOS获取当前年份
+    mov al, 9
+    out 70h, al
+    in al, 71h
+    mov ah, 0
+    retf
+
+
+getDateMonth:;函数：从CMOS获取当前月份
+    mov al, 8
+    out 70h, al
+    in al, 71h
+    mov ah, 0
+    retf
+    
+getDateDay:;函数：从CMOS获取当前日期
+    mov al, 7
+    out 70h, al
+    in al, 71h
+    mov ah, 0
+    retf
+
+getDateHour:;函数：从CMOS获取当前小时
+    mov al, 4
+    out 70h, al
+    in al, 71h
+    mov ah, 0
+    retf
+
+
+getDateMinute:;函数：从CMOS获取当前分钟
+    mov al, 2
+    out 70h, al
+    in al, 71h
+    mov ah, 0
+    retf
+
+getDateSecond:;函数：从CMOS获取当前秒钟
+    mov al, 0
+    out 70h, al
+    in al, 71h
+    mov ah, 0
     retf

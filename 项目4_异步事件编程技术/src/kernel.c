@@ -8,7 +8,6 @@
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 
-extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t addr);
 extern void clearScreen();
 extern void powerOff();
 extern uint8_t getUsrProgNum();
@@ -18,6 +17,13 @@ extern uint8_t getUsrProgCylinder(uint16_t pid);
 extern uint8_t getUsrProgHead(uint16_t pid);
 extern uint8_t getUsrProgSector(uint16_t pid);
 extern uint16_t getUsrProgAddr(uint16_t pid);
+extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t addr);
+extern uint8_t getDateYear();
+extern uint8_t getDateMonth();
+extern uint8_t getDateDay();
+extern uint8_t getDateHour();
+extern uint8_t getDateMinute();
+extern uint8_t getDateSecond();
 
 char* initcmd = "run 1 2 3 4";
 
@@ -51,6 +57,7 @@ void showHelp() {
     "    list - show a list of user programmes and their PIDs\r\n"
     "    run <PIDs> - run user programmes in sequence, e.g. `run 3 2 1`\r\n"
     "    poweroff - force shutdown the machine\r\n"
+    "    date - display the current date and time\r\n"
     ;
     print(help_msg);
 }
@@ -80,6 +87,12 @@ void listUsrProg() {
     }
 }
 
+/* 将BCD码转为数字 */
+uint8_t bcd2decimal(uint8_t bcd)
+{
+    return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F);
+}
+
 /* 操作系统shell */
 void shell() {
     clearScreen();
@@ -87,8 +100,8 @@ void shell() {
     
     char cmdstr[BUFLEN+1] = {0};  // 用于存放用户输入的命令和参数
     char cmd_firstword[BUFLEN+1] = {0};  // 用于存放第一个空格之前的子串
-    enum command       { help,   clear,   list,   run,   poweroff };
-    char* commands[] = {"help", "clear", "list", "run", "poweroff"};
+    enum command       { help,   clear,   list,   run,   poweroff,   date};
+    char* commands[] = {"help", "clear", "list", "run", "poweroff", "date"};
 
     while(1) {
         promptString();
@@ -141,6 +154,16 @@ void shell() {
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();
+        }
+        else if(strcmp(cmd_firstword, commands[date]) == 0) {
+            putchar('2'); putchar('0');
+            print(itoa(bcd2decimal(getDateYear()), 10)); putchar('-');
+            print(itoa(bcd2decimal(getDateMonth()), 10)); putchar('-');
+            print(itoa(bcd2decimal(getDateDay()), 10)); putchar(' ');
+            print(itoa(bcd2decimal(getDateHour()), 10)); putchar(':');
+            print(itoa(bcd2decimal(getDateMinute()), 10)); putchar(':');
+            print(itoa(bcd2decimal(getDateSecond()), 10));
+            NEWLINE;
         }
         else {
             if(cmd_firstword[0] != '\0') {
