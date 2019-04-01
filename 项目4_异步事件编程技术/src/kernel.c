@@ -2,11 +2,12 @@
  * @Author: Jed
  * @Description: C库；以C语言编写的库文件
  * @Date: 2019-03-21
- * @LastEditTime: 2019-03-29
+ * @LastEditTime: 2019-04-01
  */
 #include "stringio.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
+#define OS_VERSION "1.2"
 
 extern void clearScreen();
 extern void powerOff();
@@ -24,32 +25,31 @@ extern uint8_t getDateDay();
 extern uint8_t getDateHour();
 extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
-
-char* initcmd = "run 1 2 3 4";
+extern uint16_t switchHotwheel();
 
 /* 系统启动界面 */
 void startUp() {
     clearScreen();
-    char* title = "JedOS V1.1";
-    char* subtitle = "Zhang Yixin, 17341203";
-    char* date = "2019-03-23";
-    char* hint = "System is loaded successfully. Press ENTER to start shell.";
+    const char* title = "JedOS v" OS_VERSION;
+    const char* subtitle = "Zhang Yixin, 17341203";
+    const char* date = "2019-04-01";
+    const char* hint = "System has been loaded successfully. Press ENTER to start shell.";
     printInPos(title, strlen(title), 5, 35);
     printInPos(subtitle, strlen(subtitle), 6, 29);
     printInPos(date, strlen(date), 8, 35);
-    printInPos(hint, strlen(hint), 15, 11);
+    printInPos(hint, strlen(hint), 15, 8);
 }
 
 /* 打印系统提示符 */
 void promptString() {
-    char* prompt_string = "JedOS # ";
-    print(prompt_string);
+    const char* prompt_string = "JedOS # ";
+    print_c(prompt_string, 0x0B);  // 浅青色
 }
 
 /* 显示帮助信息 */
 void showHelp() {
-    char *help_msg = 
-    "Shell for JedOS, version 1.1 - on x86 PC\r\n"
+    const char *help_msg = 
+    "Shell for JedOS, version " OS_VERSION " - on x86 PC\r\n"
     "This is a shell which is used for JedOS. These shell commands are defined internally. Use `help` to see the list.\r\n"
     "\r\n"
     "    help - show information about builtin commands\r\n"
@@ -58,16 +58,17 @@ void showHelp() {
     "    run <PIDs> - run user programmes in sequence, e.g. `run 3 2 1`\r\n"
     "    poweroff - force shutdown the machine\r\n"
     "    date - display the current date and time\r\n"
+    "    hotwheel - turn on/off the hotwheel\r\n"
     ;
     print(help_msg);
 }
 
 /* 显示用户程序信息 */
 void listUsrProg() {
-    char* hint = "You can use `run <PID>` to run a user programme.\r\n";
-    char* list_head =
+    const char* hint = "You can use `run <PID>` to run a user programme.\r\n";
+    const char* list_head =
         "PID  -     Name         -  Size  -  Addr - Cylinder - Head - Sector\r\n";
-    char* separator = "  -  ";
+    const char* separator = "  -  ";
     print(hint);
     print(list_head);
     uint16_t prog_num = getUsrProgNum();  // 获取用户程序数量
@@ -100,8 +101,8 @@ void shell() {
     
     char cmdstr[BUFLEN+1] = {0};  // 用于存放用户输入的命令和参数
     char cmd_firstword[BUFLEN+1] = {0};  // 用于存放第一个空格之前的子串
-    enum command       { help,   clear,   list,   run,   poweroff,   date};
-    char* commands[] = {"help", "clear", "list", "run", "poweroff", "date"};
+    enum command       { help,   clear,   list,   run,   poweroff,   date,   hotwheel};
+    const char* commands[] = {"help", "clear", "list", "run", "poweroff", "date", "hotwheel"};
 
     while(1) {
         promptString();
@@ -140,11 +141,11 @@ void shell() {
                         clearScreen();
                     }
                 }
-                char* hint = "All programmes have been executed successfully as you wish.\r\n";
+                const char* hint = "All programmes have been executed successfully as you wish.\r\n";
                 print(hint);
             }
             else {  // 参数无效，报错，不执行任何用户程序
-                char* error_msg = "Invalid arguments. PIDs must be decimal numbers and less than or equal to ";
+                const char* error_msg = "Invalid arguments. PIDs must be decimal numbers and less than or equal to ";
                 print(error_msg);
                 print(itoa(getUsrProgNum(), 10));
                 putchar('.');
@@ -165,9 +166,19 @@ void shell() {
             print(itoa(bcd2decimal(getDateSecond()), 10));
             NEWLINE;
         }
+        else if(strcmp(cmd_firstword, commands[hotwheel]) == 0) {
+            const char* turned_on = "Hotwheel has been turned on.\r\n";
+            const char* turned_off = "Hotwheel has been turned off.\r\n";
+            if(switchHotwheel()==0) {
+                print(turned_off);
+            }
+            else {
+                print(turned_on);
+            }
+        }
         else {
             if(cmd_firstword[0] != '\0') {
-                char* error_msg = ": command not found\r\n";
+                const char* error_msg = ": command not found\r\n";
                 print(cmd_firstword);
                 print(error_msg);
             }

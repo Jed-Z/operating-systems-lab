@@ -2,25 +2,26 @@
  * @Author: Jed
  * @Description: 涉及字符串输入输出的C函数库
  * @Date: 2019-03-23
- * @LastEditTime: 2019-03-29
+ * @LastEditTime: 2019-04-01
  */
 #include <stdint.h>
-
-extern void printInPos(char *msg, uint16_t len, uint8_t row, uint8_t col);
-extern void putchar(char c);
+#define funi(a) fun( a, 10)
+extern void printInPos(const char *msg, uint16_t len, uint8_t row, uint8_t col);
+// extern void putchar(char c);
+extern void putchar_c(char c, uint8_t color);
 extern char getch();
-
+enum bios_color {white_c=0x07};
 // char tempc;  // 临时存放一个字符的地方
 
 /* 字符串长度 */
-uint16_t strlen(char *str) {
+uint16_t strlen(const char *str) {
     int count = 0;
     while (str[count++] != '\0');
     return count - 1;  // 循环中使用后递增，因此这里需要减1
 }
 
 /* 比较字符串 */
-uint8_t strcmp(char* str1, char* str2) {
+uint8_t strcmp(const char* str1, const char* str2) {
     int i = 0;
     while (1) {
         if(str1[i]=='\0' || str2[i]=='\0') { break; }
@@ -30,10 +31,22 @@ uint8_t strcmp(char* str1, char* str2) {
     return str1[i] - str2[i];
 }
 
+/* 显示一个白色字符 */
+void putchar(char c) {
+    putchar_c(c, 0x07);
+}
+
 /* 在光标处显示字符串 */
-void print(char* str) {
+void print(const char* str) {
     for(int i = 0, len = strlen(str); i < len; i++) {
         putchar(str[i]);
+    }
+}
+
+/* 在光标处显示彩色字符串 */
+void print_c(const char* str, uint8_t color) {
+    for(int i = 0, len = strlen(str); i < len; i++) {
+        putchar_c(str[i], color);
     }
 }
 
@@ -86,7 +99,7 @@ void readToBuf(char* buffer, uint16_t maxlen) {
 }
 
 /* 将整数转为指定进制的字符串 */
-char* itoa(int val, int base) {
+const char* itoa(int val, int base) {
 	if(val==0) return "0";
 	static char buf[32] = {0};
 	int i = 30;
@@ -102,7 +115,7 @@ uint8_t isnum(char c) {
 }
 
 /* 获取字符串的第一个空格前的词 */
-void getFirstWord(char* str, char* buf) {
+void getFirstWord(const char* str, char* buf) {
     int i = 0;
     while(str[i] && str[i] != ' ') {
         buf[i] = str[i];
@@ -112,7 +125,7 @@ void getFirstWord(char* str, char* buf) {
 }
 
 /* 获取字符串的第一个空格后的词 */
-void getAfterFirstWord(char* str, char* buf) {
+void getAfterFirstWord(const char* str, char* buf) {
     buf[0] = '\0';  // 为了应对用户故意搞破坏
     int i = 0;
     while(str[i] && str[i] != ' ') {
