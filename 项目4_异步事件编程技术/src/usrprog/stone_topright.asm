@@ -2,7 +2,7 @@
 ; 改写：张怡昕（17341203） 2019-03
 ; 说明：本程序是jed_stone.asm的改版。本程序在显示器左上角进行字符反弹。
 ; 参数：(39, -1, 80, 13, 40, 7)
-%include "header.asm"
+%include "../macro.asm"
 org offset_usrprog2
 
     Dn_Rt equ 1            ; D-Down,U-Up,R-right,L-Left
@@ -23,10 +23,7 @@ start:
     pusha
     mov ax, 0
     mov es, ax
-    mov si, [es:4*09h]     ; 以下4条指令把当前09h号中断移至39h号
-    mov [es:4*39h], si
-    mov si, [es:4*09h+2]
-    mov [es:4*39h+2], si
+    MOVE_INT_VECTOR 09h, 39h
     WRITE_INT_VECTOR 09h, IntOuch
     call ClearScreen       ; 清屏
     mov ax,cs
@@ -194,6 +191,7 @@ continue:
     jmp loop1
 
 QuitUsrProg:
+    MOVE_INT_VECTOR 39h, 09h
     mov si, [es:4*39h]     ; 以下4条指令恢复原来的BIOS 09h号
     mov [es:4*09h], si
     mov si, [es:4*39h+2]

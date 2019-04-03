@@ -1,3 +1,9 @@
+offset_usrprog1 equ 0A300h
+offset_usrprog2 equ 0A700h
+offset_usrprog3 equ 0AB00h
+offset_usrprog4 equ 0AF00h
+offset_intcaller equ 0xB300
+
 offset_upinfo equ 7E00h         ; 用户程序信息表被装入的位置
 
 
@@ -28,3 +34,22 @@ offset_upinfo equ 7E00h         ; 用户程序信息表被装入的位置
     pop ax
 %endmacro
 
+%macro PRINT_IN_POS 4
+    pusha                    ; 保护现场
+    push ds
+    push es
+    mov	ax, cs               ; 置其他段寄存器值与CS相同
+    mov	ds, ax               ; 数据段
+    mov	bp, %1               ; BP=当前串的偏移地址
+    mov	ax, ds               ; ES:BP = 串地址
+    mov	es, ax               ; 置ES=DS
+    mov	cx, %2               ; CX = 串长（=9）
+    mov	ax, 1301h            ; AH = 13h（功能号）、AL = 01h（光标置于串尾）
+    mov	bx, 0007h            ; 页号为0(BH = 0) 黑底白字(BL = 07h)
+    mov dh, %3               ; 行号=0
+    mov	dl, %4               ; 列号=0
+    int	10h                  ; BIOS的10h功能：显示一行字符
+    pop es
+    pop ds
+    popa                     ; 恢复现场
+%endmacro

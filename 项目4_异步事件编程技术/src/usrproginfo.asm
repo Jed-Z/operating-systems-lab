@@ -3,7 +3,7 @@
 ; @Date: 2019-03-29
 ; @LastEditTime: 2019-04-01
 
-%include "usrprog/header.asm"
+%include "macro.asm"
 %macro UsrProgInfoBlock 7    ; 参数：(PID,程序名,字节数,柱面,磁头,扇区,内存地址)
     pid%1 db %1              ; 程序编号PID；相对偏移0
     name%1 db %2             ; 程序名（至多32字节）；相对偏移1
