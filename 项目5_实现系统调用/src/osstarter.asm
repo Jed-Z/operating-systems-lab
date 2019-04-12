@@ -11,8 +11,9 @@ BITS 16
 
 global _start
 _start:
-    MOVE_INT_VECTOR 08h, 38h
+    MOVE_INT_VECTOR 08h, 38h    ; 将08h号中断保存至38h号
     WRITE_INT_VECTOR 08h, Timer ; 装填时钟中断向量表
+    
     call dword startUp
 
 Keyboard:

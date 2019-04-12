@@ -250,12 +250,14 @@ getDateMonth:                   ; 函数：从CMOS获取当前月份
     mov ah, 0
     retf
 
+
 getDateDay:                     ; 函数：从CMOS获取当前日期
     mov al, 7
     out 70h, al
     in al, 71h
     mov ah, 0
     retf
+
 
 getDateHour:                    ; 函数：从CMOS获取当前小时
     mov al, 4
@@ -271,6 +273,7 @@ getDateMinute:                  ; 函数：从CMOS获取当前分钟
     in al, 71h
     mov ah, 0
     retf
+
 
 getDateSecond:                  ; 函数：从CMOS获取当前秒钟
     mov al, 0
