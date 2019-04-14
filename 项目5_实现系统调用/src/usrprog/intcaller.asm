@@ -16,10 +16,10 @@ Start:
     PRINT_IN_POS hint_msg2, hint_msg2_len, 10, 10
 
     ; 这四个中断处理程序是相同的，参数是不同的
-    WRITE_INT_VECTOR 33, Int33~36
-    WRITE_INT_VECTOR 34, Int33~36
-    WRITE_INT_VECTOR 35, Int33~36
-    WRITE_INT_VECTOR 36, Int33~36
+    WRITE_INT_VECTOR 33h, Int33~36
+    WRITE_INT_VECTOR 34h, Int33~36
+    WRITE_INT_VECTOR 35h, Int33~36
+    WRITE_INT_VECTOR 36h, Int33~36
 
 Keyboard:
     mov ah, 0
@@ -39,22 +39,22 @@ Keyboard:
 callInt33:
     mov word[start_row], 0
     mov word[end_row], 5
-    int 33
+    int 33h
     jmp QuitUsrProg
 callInt34:
     mov word[start_row], 6
     mov word[end_row], 11
-    int 34
+    int 34h
     jmp QuitUsrProg
 callInt35:
     mov word[start_row], 12
     mov word[end_row], 17
-    int 35
+    int 35h
     jmp QuitUsrProg
 callInt36:
     mov word[start_row], 18
     mov word[end_row], 24
-    int 36
+    int 36h
     jmp QuitUsrProg
 
 QuitUsrProg:

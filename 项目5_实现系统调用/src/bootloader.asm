@@ -9,6 +9,8 @@ org 7c00h
 
 global _start
 _start:
+    mov ax, cs
+    mov ds, ax              ; ds=cs
     PRINT_IN_POS msg, msg_len, 0, 0
 
 LoadOsKernel:               ; 加载操作系统内核

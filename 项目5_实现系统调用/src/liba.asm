@@ -11,6 +11,7 @@ BITS 16
 [global putchar_c]
 [global getch]
 [global powerOff]
+[global reBoot]
 [global getUsrProgNum]
 [global getUsrProgName]
 [global getUsrProgSize]
@@ -26,13 +27,12 @@ BITS 16
 [global getDateMinute]
 [global getDateSecond]
 [global switchHotwheel]
+[global syscall]
 
 
 clearScreen:                    ; 函数：清屏
-    push ax
-    mov ax, 0003h
-    int 10h                     ; 中断调用，清屏
-    pop ax
+    mov ah, 02h                 ; 系统调用功能号
+    int 21h                     ; 系统调用
     retf
 
 
@@ -55,39 +55,34 @@ printInPos:                     ; 函数：在指定位置显示字符串
     retf
 
 
-putchar_c:                        ; 函数：在光标处打印一个彩色字符
+putchar_c:                      ; 函数：在光标处打印一个彩色字符
     pusha
-    push ds
-    push es
-    mov bx, 0                   ; 页号=0
-    mov ah, 03h                 ; 功能号：获取光标位置
-    int 10h                     ; dh=行，dl=列
-    mov ax, cs
-    mov ds, ax                  ; ds = cs
-    mov es, ax                  ; es = cs
+    push bp
     mov bp, sp
-    add bp, 20+4                ; 参数地址，es:bp指向要显示的字符
-    mov cx, 1                   ; 显示1个字符
-    mov ax, 1301h               ; AH = 13h（功能号）、AL = 01h（光标置于串尾）
-    mov bh, 0                   ; 页号
-    mov bl, [bp+4]              ; 颜色属性
-    int 10h                     ; 显示字符串（1个字符）
-    pop es
-    pop ds
+    add bp, 16+2+4
+    mov al, [bp]                ; al=要显示的字符
+    mov bl, [bp+4]              ; bl=字符颜色属性
+    mov ah, 03h                 ; 系统调用功能号
+    int 21h                     ; 系统调用
+    pop bp
     popa
     retf
 
-getch:                          ; 函数：读取一个字符到tempc（无回显）
-    mov ah, 0                   ; 功能号
-    int 16h                     ; 读取字符，al=读到的字符
-    mov ah, 0                   ; 为返回值做准备
+getch:                          ; 函数：读取一个字符（无回显）并返回
+    mov ah, 05h                 ; 系统调用功能号
+    int 21h                     ; 系统调用
     retf
 
 
 powerOff:                       ; 函数：强制关机
-    mov ax, 2001H
-    mov dx, 1004H
-    out dx, ax
+    mov ah, 00h                 ; 系统调用功能号
+    int 21h                     ; 系统调用
+    retf
+
+reBoot:                         ; 函数：重启
+    mov ah, 01h                 ; 系统调用功能号
+    int 21h                     ; 系统调用
+    retf
 
 
 getUsrProgNum:
@@ -234,51 +229,44 @@ loadAndRun:                     ; 函数：从软盘中读取扇区到内存并�
     popa
     retf
 
-
 getDateYear:                    ; 函数：从CMOS获取当前年份
-    mov al, 9
-    out 70h, al
-    in al, 71h
-    mov ah, 0
+    mov ah, 0Ah                 ; 系统调用功能号
+    int 21h                     ; cx=年，dh=月，dl=日
+    mov ax, cx
     retf
-
 
 getDateMonth:                   ; 函数：从CMOS获取当前月份
-    mov al, 8
-    out 70h, al
-    in al, 71h
+    mov ah, 0Ah                 ; 系统调用功能号
+    int 21h                     ; cx=年，dh=月，dl=日
+    mov al, dh
     mov ah, 0
     retf
-
 
 getDateDay:                     ; 函数：从CMOS获取当前日期
-    mov al, 7
-    out 70h, al
-    in al, 71h
+    mov ah, 0Ah                 ; 系统调用功能号
+    int 21h                     ; cx=年，dh=月，dl=日
+    mov al, dl
     mov ah, 0
     retf
-
 
 getDateHour:                    ; 函数：从CMOS获取当前小时
-    mov al, 4
-    out 70h, al
-    in al, 71h
+    mov ah, 0Bh                 ; 系统调用功能号
+    int 21h                     ; ch=时，cl=分，dh=秒
+    mov al, ch
     mov ah, 0
     retf
-
 
 getDateMinute:                  ; 函数：从CMOS获取当前分钟
-    mov al, 2
-    out 70h, al
-    in al, 71h
+    mov ah, 0Bh                 ; 系统调用功能号
+    int 21h                     ; ch=时，cl=分，dh=秒
+    mov al, cl
     mov ah, 0
     retf
 
-
 getDateSecond:                  ; 函数：从CMOS获取当前秒钟
-    mov al, 0
-    out 70h, al
-    in al, 71h
+    mov ah, 0Bh                 ; 系统调用功能号
+    int 21h                     ; ch=时，cl=分，dh=秒
+    mov al, dh
     mov ah, 0
     retf
 
@@ -305,3 +293,29 @@ switchHotwheel:                 ; 函数：打开或关闭风火轮
     switchDone:
     pop es
     retf
+
+[extern sys_powerOff]
+[extern sys_reBoot]
+[extern sys_clearScreen]
+[extern sys_putchar]
+[extern sys_print]
+[extern sys_getch]
+[extern sys_getDate]
+[extern sys_getTime]
+syscall:
+    push ds
+    push si                     ; 用si作为内部临时寄存器
+    mov si, cs
+    mov ds, si                  ; ds = cs
+    mov si, ax
+    shr si, 8                   ; si = 功能号
+    add si, si                  ; si = 2 * 功能号
+    call [sys_table+si]
+    pop si
+    pop ds
+    iret
+    sys_table:
+        dw sys_powerOff, sys_reBoot,
+        dw sys_clearScreen, sys_putchar, sys_print, sys_getch
+        dw 0, 0, 0, 0           ; 保留
+        dw sys_getDate, sys_getTime
