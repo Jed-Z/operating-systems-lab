@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 涉及字符串输入输出的C函数库
  * @Date: 2019-03-23
- * @LastEditTime: 2019-04-17
+ * @LastEditTime: 2019-04-19
  */
 #include <stdint.h>
 extern void printInPos(const char *msg, uint16_t len, uint8_t row, uint8_t col);

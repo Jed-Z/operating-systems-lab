@@ -11,6 +11,7 @@ BITS 16
 [global putchar_c]
 [global getch]
 [global powerOff]
+[global reBoot]
 [global getUsrProgNum]
 [global getUsrProgName]
 [global getUsrProgSize]
@@ -101,6 +102,10 @@ powerOff:                       ; 函数：强制关机
     mov ax, 2001H
     mov dx, 1004H
     out dx, ax
+
+
+reBoot:
+    int 19h
 
 
 getUsrProgNum:

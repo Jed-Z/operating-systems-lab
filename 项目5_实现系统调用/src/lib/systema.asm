@@ -38,26 +38,34 @@ sys_toUpper:
 
 [extern tolower]
 sys_toLower:
+    push es           ; 传递参数
+    push dx           ; 传递参数
+    call dword tolower
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
 sys_atoi:
+    ret
 
 sys_itoa:
+    ret
 
 [extern strlen]
 sys_printInPos:
     pusha
-    mov bp, dx
+    mov bp, dx        ; es:bp=串地址
+    push es           ; 传递参数
+    push bp           ; 传递参数
+    call dword strlen ; 返回值ax=串长
+    pop bp            ; 丢弃参数
+    pop es            ; 丢弃参数
+    mov bl, 07h       ; 颜色
     mov dh, ch        ; 行号
     mov dl, cl        ; 列号
-    push es           ; 传递参数
-    push dx           ; 传递参数
-    call dword strlen ; 返回值ax=串长
-    pop dx            ; 丢弃参数
-    pop es            ; 丢弃参数
     mov cx, ax        ; 串长
     mov bh, 0         ; 页码
-    mov al, 01h       ; 光标置于串尾
+    mov al, 0         ; 光标不动
     mov ah, 13h       ; BIOS功能号
     int 10h
     popa

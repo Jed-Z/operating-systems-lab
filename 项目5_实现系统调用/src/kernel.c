@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-17
+ * @LastEditTime: 2019-04-19
  */
 #include "stringio.h"
 #define BUFLEN 16
@@ -11,6 +11,7 @@
 
 extern void clearScreen();
 extern void powerOff();
+extern void reBoot();
 extern uint8_t getUsrProgNum();
 extern char* getUsrProgName(uint16_t pid);
 extern uint16_t getUsrProgSize(uint16_t pid);
@@ -56,7 +57,8 @@ void showHelp() {
     "    clear - clear the terminal screen\r\n"
     "    list - show a list of user programmes and their PIDs\r\n"
     "    run <PIDs> - run user programmes in sequence, e.g. `run 3 2 1`\r\n"
-    "    poweroff - force shutdown the machine\r\n"
+    "    poweroff - force power-off the machine\r\n"
+    "    reboot - reboot the machine"
     "    date - display the current date and time\r\n"
     "    hotwheel - turn on/off the hotwheel\r\n"
     ;
@@ -101,8 +103,8 @@ void shell() {
     
     char cmdstr[BUFLEN+1] = {0};  // 用于存放用户输入的命令和参数
     char cmd_firstword[BUFLEN+1] = {0};  // 用于存放第一个空格之前的子串
-    enum command       { help,   clear,   list,   run,   poweroff,   date,   hotwheel};
-    const char* commands[] = {"help", "clear", "list", "run", "poweroff", "date", "hotwheel"};
+    enum command             { help,   clear,   list,   run,   poweroff,    reboot,   date,   hotwheel};
+    const char* commands[] = {"help", "clear", "list", "run", "poweroff",  "reboot", "date", "hotwheel"};
 
     while(1) {
         promptString();
@@ -155,6 +157,9 @@ void shell() {
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();
+        }
+        else if(strcmp(cmd_firstword, commands[reboot]) == 0) {
+            reBoot();
         }
         else if(strcmp(cmd_firstword, commands[date]) == 0) {
             putchar('2'); putchar('0');
