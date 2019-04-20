@@ -17,7 +17,7 @@ sys_showOuch:
     mov	es, ax        ; 置ES=DS
     mov	cx, 4         ; CX = 串长
     mov	ax, 1301h     ; AH = 13h（功能号）、AL = 01h（光标置于串尾）
-    mov	bx, 0007h     ; 页号为0(BH = 0) 黑底白字(BL = 07h)
+    mov	bx, 0038h     ; 页号为0(BH = 0) 黑底白字(BL = 07h)
     mov dh, 12        ; 行号
     mov	dl, 38        ; 列号
     int	10h           ; BIOS的10h功能：显示一行字符
@@ -45,10 +45,33 @@ sys_toLower:
     pop es            ; 丢弃参数
     ret
 
+[extern atoi]
 sys_atoi:
+    push es           ; 传递参数
+    push dx           ; 传递参数
+    call dword atoi
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
+[extern itoa_buf]
 sys_itoa:
+    push es           ; 传递参数buf
+    push dx           ; 传递参数buf
+    mov ax, 0
+    push ax           ; 传递参数base
+    mov ax, 10        ; 10进制
+    push ax           ; 传递参数base
+    mov ax, 0
+    push ax           ; 传递参数val
+    push bx           ; 传递参数val
+    call dword itoa_buf
+    pop bx            ; 丢弃参数
+    pop ax            ; 丢弃参数
+    pop ax            ; 丢弃参数
+    pop ax            ; 丢弃参数
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
 [extern strlen]

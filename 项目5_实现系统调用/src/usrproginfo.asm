@@ -24,7 +24,7 @@ UserProgInfo:
     UsrProgInfoBlock 3, 'stone_botleft', 1024, 0, 1, 5, offset_usrprog3
     UsrProgInfoBlock 4, 'stone_botright', 1024, 0, 1, 7, offset_usrprog4
     UsrProgInfoBlock 5, 'interrupt_caller', 512, 0, 1, 9, offset_intcaller
-    UsrProgInfoBlock 6, 'syscall_test', 1024, 0, 1, 10, offset_syscalltest
+    UsrProgInfoBlock 6, 'syscall_test', 1536, 0, 1, 10, offset_syscalltest
 
 SectorEnding:
     times 512-($-$$) db 0

@@ -98,7 +98,7 @@ void readToBuf(char* buffer, uint16_t maxlen) {
 }
 
 /* 将整数转为指定进制的字符串 */
-const char* itoa(int val, int base) {
+char* itoa(int val, int base) {
 	if(val==0) return "0";
 	static char buf[32] = {0};
 	int i = 30;

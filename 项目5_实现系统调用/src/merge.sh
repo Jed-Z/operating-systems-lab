@@ -36,7 +36,7 @@ dd if=./temp/stone_topright.bin of=JedOS_v1.3.img bs=512 seek=20 count=2 2> /dev
 dd if=./temp/stone_bottomleft.bin of=JedOS_v1.3.img bs=512 seek=22 count=2 2> /dev/null
 dd if=./temp/stone_bottomright.bin of=JedOS_v1.3.img bs=512 seek=24 count=2 2> /dev/null
 dd if=./temp/interrupt_caller.bin of=JedOS_v1.3.img bs=512 seek=26 count=1 2> /dev/null
-dd if=./temp/syscall_test.bin of=JedOS_v1.3.img bs=512 seek=27 count=2 2> /dev/null
+dd if=./temp/syscall_test.bin of=JedOS_v1.3.img bs=512 seek=27 count=3 2> /dev/null
 
 
 echo "[+] Done."
