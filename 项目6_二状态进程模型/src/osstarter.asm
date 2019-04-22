@@ -8,14 +8,14 @@ BITS 16
 [extern startUp]
 [extern shell]
 [extern syscaller]
-; [extern Timer]
+[extern Timer]
 
 global _start
 _start:
     WRITE_INT_VECTOR 21h, syscaller
 
     MOVE_INT_VECTOR 08h, 38h
-    ; WRITE_INT_VECTOR 08h, Timer ; 装填时钟中断向量表
+    WRITE_INT_VECTOR 08h, Timer ; 装填时钟中断向量表
     call dword startUp
 
 Keyboard:

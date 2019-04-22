@@ -22,8 +22,9 @@ cd ..
 
 nasm -f elf32 osstarter.asm -o ./temp/osstarter.o
 nasm -f elf32 liba.asm -o ./temp/liba.o
+nasm -f elf32 timer.asm -o ./temp/timer.o
 gcc -c -m16 -march=i386 -masm=intel -nostdlib -ffreestanding -mpreferred-stack-boundary=2 -lgcc -shared kernel.c -o ./temp/kernel.o
-ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/osstarter.o ./temp/liba.o ./temp/kernel.o ./temp/systema.o ./temp/systemc.o -o ./temp/kernel.bin
+ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/osstarter.o ./temp/liba.o ./temp/kernel.o ./temp/systema.o ./temp/systemc.o ./temp/timer.o -o ./temp/kernel.bin
 rm ./temp/*.o
 
 dd if=./temp/bootloader.bin of=JedOS_v1.4.img bs=512 count=1 2> /dev/null

@@ -2,9 +2,10 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-21
+ * @LastEditTime: 2019-04-22
  */
 #include "stringio.h"
+#include "pcb.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 #define OS_VERSION "1.4"
@@ -13,12 +14,12 @@ extern void clearScreen();
 extern void powerOff();
 extern void reBoot();
 extern uint8_t getUsrProgNum();
-extern char* getUsrProgName(uint16_t pid);
-extern uint16_t getUsrProgSize(uint16_t pid);
-extern uint8_t getUsrProgCylinder(uint16_t pid);
-extern uint8_t getUsrProgHead(uint16_t pid);
-extern uint8_t getUsrProgSector(uint16_t pid);
-extern uint16_t getUsrProgAddr(uint16_t pid);
+extern char* getUsrProgName(uint16_t progid);
+extern uint16_t getUsrProgSize(uint16_t progid);
+extern uint8_t getUsrProgCylinder(uint16_t progid);
+extern uint8_t getUsrProgHead(uint16_t progid);
+extern uint8_t getUsrProgSector(uint16_t progid);
+extern uint16_t getUsrProgAddr(uint16_t progid);
 extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t addr);
 extern uint8_t getDateYear();
 extern uint8_t getDateMonth();
@@ -26,6 +27,7 @@ extern uint8_t getDateDay();
 extern uint8_t getDateHour();
 extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
+extern uint8_t bcd2decimal(uint8_t bcd);
 
 /* 系统启动界面 */
 void startUp() {
@@ -54,10 +56,11 @@ void showHelp() {
     "\r\n"
     "    help - show information about builtin commands\r\n"
     "    clear - clear the terminal screen\r\n"
-    "    list - show a list of user programmes and their PIDs\r\n"
-    "    run <PIDs> - run user programmes in sequence, e.g. `run 3 2 1`\r\n"
+    "    list - show a list of user programmes and their ProgIDs\r\n"
+    "    bat <ProgIDs> - run user programmes in batch method, e.g. `bat 3 2 1`\r\n"
+    "    run <ProgIDs> - create processes and run programmes simultaneously\r\n"
     "    poweroff - force power-off the machine\r\n"
-    "    reboot - reboot the machine"
+    "    reboot - reboot the machine\r\n"
     "    date - display the current date and time\r\n"
     ;
     print(help_msg);
@@ -65,15 +68,15 @@ void showHelp() {
 
 /* 显示用户程序信息 */
 void listUsrProg() {
-    const char* hint = "You can use `run <PID>` to run a user programme.\r\n";
+    const char* hint = "You can use `run <ProgID>` to run a user programme.\r\n";
     const char* list_head =
-        "PID  -     Name         -  Size  -  Addr - Cylinder - Head - Sector\r\n";
+        "ProgID  -  Name         -  Size  -  Addr - Cylinder - Head - Sector\r\n";
     const char* separator = "  -  ";
     print(hint);
     print(list_head);
     uint16_t prog_num = getUsrProgNum();  // 获取用户程序数量
     for(int i = 1; i <= prog_num; i++) {
-        print(itoa(i, 10)); print(separator);  // 打印PID
+        print(itoa(i, 10)); print(separator);  // 打印ProgID
         print(getUsrProgName(i));
         for(int j = 0, len = 16-strlen(getUsrProgName(i)); j < len; j++) {
             putchar(' ');
@@ -88,10 +91,52 @@ void listUsrProg() {
     }
 }
 
-/* 将BCD码转为数字 */
-uint8_t bcd2decimal(uint8_t bcd)
-{
-    return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F);
+/* 显示日期时间 */
+void showDateTime() {
+    putchar('2'); putchar('0');
+    print(itoa(bcd2decimal(getDateYear()), 10)); putchar('-');
+    print(itoa(bcd2decimal(getDateMonth()), 10)); putchar('-');
+    print(itoa(bcd2decimal(getDateDay()), 10)); putchar(' ');
+    print(itoa(bcd2decimal(getDateHour()), 10)); putchar(':');
+    print(itoa(bcd2decimal(getDateMinute()), 10)); putchar(':');
+    print(itoa(bcd2decimal(getDateSecond()), 10));
+    NEWLINE;
+}
+
+/* 批处理执行程序 */
+void batch(char* cmdstr) {
+char progids[BUFLEN+1];
+    getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
+    uint8_t isvalid = 1;  // 参数有效标志位
+    for(int i = 0; progids[i]; i++) {  // 判断参数是有效的
+        if(!isnum(progids[i]) && progids[i]!=' ') {  // 既不是数字又不是空格，无效参数
+            isvalid = 0;
+            break;
+        }
+        if(isnum(progids[i]) && progids[i]-'0'>getUsrProgNum()) {
+            isvalid = 0;
+            break;
+        }
+    }
+    if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
+        int i = 0;
+        for(int i = 0; progids[i] != '\0'; i++) {
+            if(isnum(progids[i])) {  // 是数字（不是空格）
+                int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
+                loadAndRun(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddr(progid_to_run));
+                clearScreen();
+            }
+        }
+        const char* hint = "All programmes have been executed successfully as you wish.\r\n";
+        print(hint);
+    }
+    else {  // 参数无效，报错，不执行任何用户程序
+        const char* error_msg = "Invalid arguments. ProgIDs must be decimal numbers and less than or equal to ";
+        print(error_msg);
+        print(itoa(getUsrProgNum(), 10));
+        putchar('.');
+        NEWLINE;
+    }
 }
 
 /* 操作系统shell */
@@ -101,8 +146,8 @@ void shell() {
     
     char cmdstr[BUFLEN+1] = {0};  // 用于存放用户输入的命令和参数
     char cmd_firstword[BUFLEN+1] = {0};  // 用于存放第一个空格之前的子串
-    enum command             { help,   clear,   list,   run,   poweroff,    reboot,   date};
-    const char* commands[] = {"help", "clear", "list", "run", "poweroff",  "reboot", "date"};
+    enum command             { help,   clear,   list,   bat,   run,   poweroff,    reboot,   date};
+    const char* commands[] = {"help", "clear", "list", "bat", "run", "poweroff",  "reboot", "date"};
 
     while(1) {
         promptString();
@@ -118,40 +163,11 @@ void shell() {
         else if(strcmp(cmd_firstword, commands[list]) == 0) {
             listUsrProg();
         }
-        else if(strcmp(cmd_firstword, commands[run]) == 0) {  // run：运行用户程序
-            char pids[BUFLEN+1];
-            getAfterFirstWord(cmdstr, pids);  // 获取run后的参数列表
-            uint8_t isvalid = 1;  // 参数有效标志位
-            for(int i = 0; pids[i]; i++) {  // 判断参数是有效的
-                if(!isnum(pids[i]) && pids[i]!=' ') {  // 既不是数字又不是空格，无效参数
-                    isvalid = 0;
-                    break;
-                }
-                if(isnum(pids[i]) && pids[i]-'0'>getUsrProgNum()) {
-                    isvalid = 0;
-                    break;
-                }
-            }
-            if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
-                int i = 0;
-                for(int i = 0; pids[i] != '\0'; i++) {
-                    if(isnum(pids[i])) {  // 是数字（不是空格）
-                        int pid_to_run = pids[i] - '0';  // 要运行的用户程序PID
-                        loadAndRun(getUsrProgCylinder(pid_to_run), getUsrProgHead(pid_to_run), getUsrProgSector(pid_to_run), getUsrProgSize(pid_to_run)/512, getUsrProgAddr(pid_to_run));
-                        clearScreen();
-                    }
-                }
-                const char* hint = "All programmes have been executed successfully as you wish.\r\n";
-                print(hint);
-            }
-            else {  // 参数无效，报错，不执行任何用户程序
-                const char* error_msg = "Invalid arguments. PIDs must be decimal numbers and less than or equal to ";
-                print(error_msg);
-                print(itoa(getUsrProgNum(), 10));
-                putchar('.');
-                NEWLINE;
-            }
-
+        else if(strcmp(cmd_firstword, commands[bat]) == 0) {  // bat：批处理
+            batch(cmdstr);
+        }
+        else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
+            // process_create();
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();
@@ -160,14 +176,7 @@ void shell() {
             reBoot();
         }
         else if(strcmp(cmd_firstword, commands[date]) == 0) {
-            putchar('2'); putchar('0');
-            print(itoa(bcd2decimal(getDateYear()), 10)); putchar('-');
-            print(itoa(bcd2decimal(getDateMonth()), 10)); putchar('-');
-            print(itoa(bcd2decimal(getDateDay()), 10)); putchar(' ');
-            print(itoa(bcd2decimal(getDateHour()), 10)); putchar(':');
-            print(itoa(bcd2decimal(getDateMinute()), 10)); putchar(':');
-            print(itoa(bcd2decimal(getDateSecond()), 10));
-            NEWLINE;
+            showDateTime();
         }
         else {
             if(cmd_firstword[0] != '\0') {

@@ -4,8 +4,8 @@
 ; @LastEditTime: 2019-04-01
 
 %include "macro.asm"
-%macro UsrProgInfoBlock 7    ; 参数：(PID,程序名,字节数,柱面,磁头,扇区,内存地址)
-    pid%1 db %1              ; 程序编号PID；相对偏移0
+%macro UsrProgInfoBlock 7    ; 参数：(ProgID,程序名,字节数,柱面,磁头,扇区,内存地址)
+    progid%1 db %1              ; 程序编号ProgID；相对偏移0
     name%1 db %2             ; 程序名（至多32字节）；相对偏移1
     times 16-($-name%1) db 0 ; 程序名占6字节
     size%1 dw %3             ; 程序大小；相对偏移17

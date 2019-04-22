@@ -117,11 +117,11 @@ getUsrProgName:
     push bx
     mov bp, sp
     add bp, 4+4
-    mov al, [bp]                ; al=pid
-    add al, -1                  ; al=pid-1
+    mov al, [bp]                ; al=progid
+    add al, -1                  ; al=progid-1
     mov bl, 24                  ; 每个用户程序的信息块大小为24字节
-    mul bl                      ; ax = (pid-1) * 24
-    add ax, 1                   ; ax = 1 + (pid-1) * 24
+    mul bl                      ; ax = (progid-1) * 24
+    add ax, 1                   ; ax = 1 + (progid-1) * 24
     add ax, 1                   ; 加上name在用户程序信息中的偏移
     add ax, offset_upinfo       ; 不用方括号，因为就是要访问字符串所在的地址
     pop bx
@@ -134,11 +134,11 @@ getUsrProgSize:
     push bx
     mov bp, sp
     add bp, 4+4
-    mov al, [bp]                ; al=pid
-    add al, -1                  ; al=pid-1
+    mov al, [bp]                ; al=progid
+    add al, -1                  ; al=progid-1
     mov bl, 24                  ; 每个用户程序的信息块大小为24字节
-    mul bl                      ; ax = (pid-1) * 24
-    add ax, 1                   ; ax = 1 + (pid-1) * 24
+    mul bl                      ; ax = (progid-1) * 24
+    add ax, 1                   ; ax = 1 + (progid-1) * 24
     add ax, 17                  ; 加上size在用户程序信息中的偏移
     mov bx, ax
     add bx, offset_upinfo
@@ -153,11 +153,11 @@ getUsrProgCylinder:
     push bx
     mov bp, sp
     add bp, 4+4
-    mov al, [bp]                ; al=pid
-    add al, -1                  ; al=pid-1
+    mov al, [bp]                ; al=progid
+    add al, -1                  ; al=progid-1
     mov bl, 24                  ; 每个用户程序的信息块大小为24字节
-    mul bl                      ; ax = (pid-1) * 24
-    add ax, 1                   ; ax = 1 + (pid-1) * 24
+    mul bl                      ; ax = (progid-1) * 24
+    add ax, 1                   ; ax = 1 + (progid-1) * 24
     add ax, 19                  ; 加上cylinder在用户程序信息中的偏移
     mov bx, ax
     add bx, offset_upinfo
@@ -173,11 +173,11 @@ getUsrProgHead:
     push bx
     mov bp, sp
     add bp, 4+4
-    mov al, [bp]                ; al=pid
-    add al, -1                  ; al=pid-1
+    mov al, [bp]                ; al=progid
+    add al, -1                  ; al=progid-1
     mov bl, 24                  ; 每个用户程序的信息块大小为24字节
-    mul bl                      ; ax = (pid-1) * 24
-    add ax, 1                   ; ax = 1 + (pid-1) * 24
+    mul bl                      ; ax = (progid-1) * 24
+    add ax, 1                   ; ax = 1 + (progid-1) * 24
     add ax, 20                  ; 加上head在用户程序信息中的偏移
     mov bx, ax
     add bx, offset_upinfo
@@ -193,11 +193,11 @@ getUsrProgSector:
     push bx
     mov bp, sp
     add bp, 4+4
-    mov al, [bp]                ; al=pid
-    add al, -1                  ; al=pid-1
+    mov al, [bp]                ; al=progid
+    add al, -1                  ; al=progid-1
     mov bl, 24                  ; 每个用户程序的信息块大小为24字节
-    mul bl                      ; ax = (pid-1) * 24
-    add ax, 1                   ; ax = 1 + (pid-1) * 24
+    mul bl                      ; ax = (progid-1) * 24
+    add ax, 1                   ; ax = 1 + (progid-1) * 24
     add ax, 21                  ; 加上sector在用户程序信息中的偏移
     mov bx, ax
     add bx, offset_upinfo
@@ -213,11 +213,11 @@ getUsrProgAddr:
     push bx
     mov bp, sp
     add bp, 4+4
-    mov al, [bp]                ; al=pid
-    add al, -1                  ; al=pid-1
+    mov al, [bp]                ; al=progid
+    add al, -1                  ; al=progid-1
     mov bl, 24                  ; 每个用户程序的信息块大小为24字节
-    mul bl                      ; ax = (pid-1) * 24
-    add ax, 1                   ; ax = 1 + (pid-1) * 24
+    mul bl                      ; ax = (progid-1) * 24
+    add ax, 1                   ; ax = 1 + (progid-1) * 24
     add ax, 22                  ; 加上addr在用户程序信息中的偏移
     mov bx, ax
     add bx, offset_upinfo
