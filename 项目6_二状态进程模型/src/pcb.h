@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 进程控制块
  * @Date: 2019-04-21
- * @LastEditTime: 2019-04-22
+ * @LastEditTime: 2019-04-23
  */
 #ifndef _PCB_H_
 #define _PCB_H_
@@ -30,11 +30,11 @@ typedef struct RegisterImage{
 } RegisterImage;
 
 typedef enum PCBStatus {P_RUNNING, P_READY} PCBStatus;
+
 typedef struct PCB {
 	uint16_t pid;          // 进程标识符
 	RegisterImage regImg;  //逻辑CPU模拟
 	PCBStatus status;      // 进程状态
 } PCB;
-PCB PCB_list[MAX_PROCESS_NUM];  // 进程控制块表
 
 #endif

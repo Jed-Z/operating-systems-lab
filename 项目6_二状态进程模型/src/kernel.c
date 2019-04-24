@@ -2,10 +2,9 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-22
+ * @LastEditTime: 2019-04-24
  */
 #include "stringio.h"
-#include "pcb.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 #define OS_VERSION "1.4"
@@ -19,8 +18,9 @@ extern uint16_t getUsrProgSize(uint16_t progid);
 extern uint8_t getUsrProgCylinder(uint16_t progid);
 extern uint8_t getUsrProgHead(uint16_t progid);
 extern uint8_t getUsrProgSector(uint16_t progid);
-extern uint16_t getUsrProgAddr(uint16_t progid);
-extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t addr);
+extern uint16_t getUsrProgAddrSeg(uint16_t progid);
+extern uint16_t getUsrProgAddrOff(uint16_t progid);
+extern void loadAndRun(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t seg, uint16_t offset);
 extern uint8_t getDateYear();
 extern uint8_t getDateMonth();
 extern uint8_t getDateDay();
@@ -83,7 +83,7 @@ void listUsrProg() {
         }
         print(separator);  // 打印用户程序名
         print(itoa(getUsrProgSize(i), 10)); print(separator);  // 打印用户程序大小
-        print(itoa(getUsrProgAddr(i), 16)); print(separator);  // 打印用户程序内存地址
+        print(itoa(getUsrProgAddrSeg(i), 16)); print(separator);  // 打印用户程序内存地址
         print(itoa(getUsrProgCylinder(i), 10)); print(separator);  // 打印用户程序存放的柱面号
         print(itoa(getUsrProgHead(i), 10)); print(separator);  // 打印用户程序存放的磁头号
         print(itoa(getUsrProgSector(i), 10));  // 打印用户程序存放的起始扇区
@@ -123,7 +123,7 @@ char progids[BUFLEN+1];
         for(int i = 0; progids[i] != '\0'; i++) {
             if(isnum(progids[i])) {  // 是数字（不是空格）
                 int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
-                loadAndRun(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddr(progid_to_run));
+                loadAndRun(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
                 clearScreen();
             }
         }

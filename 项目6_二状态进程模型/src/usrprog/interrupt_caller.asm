@@ -1,5 +1,5 @@
 %include "../macro.asm"
-org offset_intcaller
+org addr_intcaller
 
 Start:
     pusha

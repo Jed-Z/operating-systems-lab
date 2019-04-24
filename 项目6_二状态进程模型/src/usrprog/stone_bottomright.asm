@@ -3,7 +3,7 @@
 ; 说明：本程序是jed_stone.asm的改版。本程序在显示器左上角进行字符反弹。
 ; 参数：(39, 11, 80, 25, 40, 19)
 %include "../macro.asm"
-org offset_usrprog4
+org addr_usrprog4 & 0FFFFh
 
     Dn_Rt equ 1            ; D-Down,U-Up,R-right,L-Left
     Up_Rt equ 2
@@ -21,6 +21,7 @@ org offset_usrprog4
 
 start:
     pusha
+    push ds
     mov ax, 0
     mov es, ax
     MOVE_INT_VECTOR 09h, 39h
@@ -195,6 +196,7 @@ end:
 
 QuitUsrProg:
     MOVE_INT_VECTOR 39h, 09h
+    pop ds
     popa
     retf
 

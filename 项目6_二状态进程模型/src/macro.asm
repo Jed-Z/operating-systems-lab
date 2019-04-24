@@ -1,12 +1,12 @@
-offset_upinfo equ 7E00h     ; 用户程序信息表被装入的位置
-offset_oskernel equ 8000h   ; 操作系统内核被装入的位置
+addr_upinfo equ 07E00h      ; 用户程序信息表被装入的位置
+addr_oskernel equ 08000h    ; 操作系统内核被装入的位置
 
-offset_usrprog1 equ 0A300h
-offset_usrprog2 equ 0A700h
-offset_usrprog3 equ 0AB00h
-offset_usrprog4 equ 0AF00h
-offset_intcaller equ 0xB300
-offset_syscalltest equ 0xB500
+addr_usrprog1 equ 11000h
+addr_usrprog2 equ 11400h
+addr_usrprog3 equ 11800h
+addr_usrprog4 equ 11C00h
+addr_intcaller equ 12000h
+addr_syscalltest equ 12400h
 
 %macro WRITE_INT_VECTOR 2   ; 写中断向量表；参数：（中断号，中断处理程序地址）
     push ax
@@ -25,7 +25,7 @@ offset_syscalltest equ 0xB500
     push es
     push si
     mov ax, 0
-    mov es, ax
+    mov es, ax              ; es=0
     mov si, [es:%1*4]
     mov [es:%2*4], si
     mov si, [es:%1*4+2]
@@ -55,18 +55,18 @@ offset_syscalltest equ 0xB500
     popa                    ; 恢复现场
 %endmacro
 
-%macro LOAD_TO_MEM 5        ; 读软盘到内存；参数：（扇区数，柱面号，磁头号，扇区号，内存地址）
+%macro LOAD_TO_MEM 6        ; 读软盘到内存；参数：（扇区数，柱面号，磁头号，扇区号，内存段值，内存偏移量）
     pusha
     push es
-    mov ax,cs               ; 段地址; 存放数据的内存基地址
-    mov es,ax               ; 设置段地址（不能直接mov es,段地址）
-    mov bx, %5              ; 偏移地址; 存放数据的内存偏移地址
-    mov ah,2                ; 功能号
+    mov ax, %5              ; 段地址; 存放数据的内存基地址
+    mov es, ax              ; 设置段地址（不能直接mov es,段地址）
+    mov bx, %6              ; 偏移地址; 存放数据的内存偏移地址
+    mov ah, 2               ; 功能号
     mov al, %1              ; 扇区数
-    mov dl,0                ; 驱动器号; 软盘为0，硬盘和U盘为80H
-    mov dh,%3               ; 磁头号; 起始编号为0
+    mov dl, 0               ; 驱动器号; 软盘为0，硬盘和U盘为80H
+    mov dh, %3              ; 磁头号; 起始编号为0
     mov ch, %2              ; 柱面号; 起始编号为0
-    mov cl,%4               ; 起始扇区号 ; 起始编号为1
+    mov cl, %4              ; 起始扇区号 ; 起始编号为1
     int 13H                 ; 调用读磁盘BIOS的13h功能
     pop es
     popa
