@@ -30,8 +30,8 @@ extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
 // extern void setProcessTimer();
-extern char process_timer;
 extern void PCBscheduler();
+void Delay();//debug
 
 /* 系统启动界面 */
 void startUp() {
@@ -166,9 +166,7 @@ void runMultiple(char* cmdstr) {
                 int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
                 process_create(progid_to_run);
             }
-            // setProcessTimer();
-            // PCBscheduler();
-            process_timer = 1;
+            Delay();//debug
         }
         const char* hint = "Processes terminated.\r\n";
         print(hint);
@@ -229,4 +227,16 @@ void shell() {
             }
         }
     }
+}
+
+void Delay()
+{
+	int i = 0;
+	int j = 0;
+	for( i=0;i<30000;i++ )
+		for( j=0;j<30000;j++ )
+		{
+			j++;
+			j--;
+		}
 }

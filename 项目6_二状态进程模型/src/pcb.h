@@ -18,25 +18,25 @@ typedef struct RegisterImage{  // 逻辑CPU模拟
 	uint16_t ds;     //4
 	uint16_t di;     //5
 	uint16_t si;     //6
-	uint16_t sp;     //7
-	uint16_t bp;     //8
-	uint16_t dx;     //9
-	uint16_t cx;     //10
-	uint16_t bx;     //11
+	uint16_t bp;     //7
+	uint16_t sp;     //8
+	uint16_t bx;     //9
+	uint16_t dx;     //10
+	uint16_t cx;     //11
 	uint16_t ax;     //12
 	uint16_t ip;     //13
 	uint16_t cs;     //14
 	uint16_t flags;  //15
 } RegisterImage;
 
-typedef enum PCBStatus {P_RUNNING, P_READY} PCBStatus;
+typedef enum PCBStatus {P_NEW, P_READY, P_RUNNING, P_EXIT} PCBStatus;
 
 typedef struct PCB {
-	int id;           // 进程标识符
+	// int id;           // 进程标识符
 	RegisterImage regimg;  //逻辑CPU模拟
 	PCBStatus status;      // 进程状态
 } PCB;
 
-int process_create(int progid);
+void process_create(int progid);
 
 #endif

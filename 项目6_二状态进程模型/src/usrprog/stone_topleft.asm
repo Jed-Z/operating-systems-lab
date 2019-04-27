@@ -22,12 +22,11 @@ org addr_usrprog1 & 0FFFFh
 start:
     pusha
     push ds
-    push ss
-    ; mov ax, 0
-    ; mov es, ax
+    mov ax, 0
+    mov es, ax
     MOVE_INT_VECTOR 09h, 39h
     WRITE_INT_VECTOR 09h, IntOuch
-    ; call ClearScreen       ; 清屏
+    call ClearScreen       ; 清屏
     mov ax,cs
     mov es,ax              ; ES = CS
     mov ds,ax              ; DS = CS
@@ -198,7 +197,6 @@ QuitUsrProg:
     mov [es:4*09h], si
     mov si, [es:4*39h+2]
     mov [es:4*09h+2], si
-    pop ss
     pop ds
     popa
     retf
