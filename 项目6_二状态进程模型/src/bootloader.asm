@@ -14,7 +14,7 @@ _start:
     PRINT_IN_POS msg, msg_len, 0, 0          ; 调用宏，显示字符串
 
 LoadOsKernel:
-    LOAD_TO_MEM 16, 0, 0, 3, 0h, addr_oskernel & 0FFFFh ; 调用宏，加载操作系统内核
+    LOAD_TO_MEM 34, 0, 0, 3, 0h, addr_oskernel & 0FFFFh ; 调用宏，加载操作系统内核
 
 LoadUsrProgInfo:
     LOAD_TO_MEM 1, 0, 0, 2, 0h, addr_upinfo & 0FFFFh    ; 调用宏，加载用户程序信息表

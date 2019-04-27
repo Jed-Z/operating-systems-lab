@@ -2,9 +2,10 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-24
+ * @LastEditTime: 2019-04-27
  */
 #include "stringio.h"
+#include "pcb.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 #define OS_VERSION "1.4"
@@ -28,6 +29,8 @@ extern uint8_t getDateHour();
 extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
+extern void setProcessTimer();
+extern void PCBscheduler();
 
 /* 系统启动界面 */
 void startUp() {
@@ -70,7 +73,7 @@ void showHelp() {
 void listUsrProg() {
     const char* hint = "You can use `run <ProgID>` to run a user programme.\r\n";
     const char* list_head =
-        "ProgID  -  Name         -  Size  -  Addr - Cylinder - Head - Sector\r\n";
+        "ProgID  - Program Name  -  Size  -  Addr - Cylinder - Head - Sector\r\n";
     const char* separator = "  -  ";
     print(hint);
     print(list_head);
@@ -83,6 +86,7 @@ void listUsrProg() {
         }
         print(separator);  // 打印用户程序名
         print(itoa(getUsrProgSize(i), 10)); print(separator);  // 打印用户程序大小
+        putchar('0'); putchar('x');  // 在十六进制数前显示0x
         print(itoa(getUsrProgAddrSeg(i), 16)); print(separator);  // 打印用户程序内存地址
         print(itoa(getUsrProgCylinder(i), 10)); print(separator);  // 打印用户程序存放的柱面号
         print(itoa(getUsrProgHead(i), 10)); print(separator);  // 打印用户程序存放的磁头号
@@ -105,7 +109,7 @@ void showDateTime() {
 
 /* 批处理执行程序 */
 void batch(char* cmdstr) {
-char progids[BUFLEN+1];
+    char progids[BUFLEN+1];
     getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
     uint8_t isvalid = 1;  // 参数有效标志位
     for(int i = 0; progids[i]; i++) {  // 判断参数是有效的
@@ -131,7 +135,44 @@ char progids[BUFLEN+1];
         print(hint);
     }
     else {  // 参数无效，报错，不执行任何用户程序
-        const char* error_msg = "Invalid arguments. ProgIDs must be decimal numbers and less than or equal to ";
+        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to ";
+        print(error_msg);
+        print(itoa(getUsrProgNum(), 10));
+        putchar('.');
+        NEWLINE;
+    }
+}
+
+/* 多进程执行程序 */
+void runMultiple(char* cmdstr) {
+    char progids[BUFLEN+1];
+    getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
+    uint8_t isvalid = 1;  // 参数有效标志位
+    for(int i = 0; progids[i]; i++) {  // 判断参数是有效的
+        if(!isnum(progids[i]) && progids[i]!=' ') {  // 既不是数字又不是空格，无效参数
+            isvalid = 0;
+            break;
+        }
+        if(isnum(progids[i]) && progids[i]-'0'>getUsrProgNum()) {
+            isvalid = 0;
+            break;
+        }
+    }
+    if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
+        int i = 0;
+        for(int i = 0; progids[i] != '\0'; i++) {
+            if(isnum(progids[i])) {  // 是数字（不是空格）
+                int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
+                process_create(progid_to_run);
+            }
+            setProcessTimer();
+            // PCBscheduler();
+        }
+        const char* hint = "Processes terminated.\r\n";
+        print(hint);
+    }
+    else {  // 参数无效，报错，不执行任何用户程序
+        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to ";
         print(error_msg);
         print(itoa(getUsrProgNum(), 10));
         putchar('.');
@@ -167,7 +208,7 @@ void shell() {
             batch(cmdstr);
         }
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
-            // process_create();
+            runMultiple(cmdstr);
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();

@@ -2,18 +2,16 @@
  * @Author: Jed
  * @Description: 涉及字符串输入输出的C函数库
  * @Date: 2019-03-23
- * @LastEditTime: 2019-04-22
+ * @LastEditTime: 2019-04-27
  */
 #ifndef _STRINGIO_H_
 #define _STRINGIO_H_
 
 #include <stdint.h>
 extern void printInPos(const char *msg, uint16_t len, uint8_t row, uint8_t col);
-// extern void putchar(char c);
 extern void putchar_c(char c, uint8_t color);
 extern char getch();
 enum bios_color {white_c=0x07};
-// char tempc;  // 临时存放一个字符的地方
 
 /* 字符串长度 */
 uint16_t strlen(const char *str) {

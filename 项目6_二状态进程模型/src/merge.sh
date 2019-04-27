@@ -30,13 +30,13 @@ ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/osstarter.o ./temp/liba.
 
 dd if=./temp/bootloader.bin of=JedOS_v1.4.img bs=512 count=1 2> /dev/null
 dd if=./temp/usrproginfo.bin of=JedOS_v1.4.img bs=512 seek=1 count=1 2> /dev/null
-dd if=./temp/kernel.bin of=JedOS_v1.4.img bs=512 seek=2 count=16 2> /dev/null
-dd if=./temp/stone_topleft.bin of=JedOS_v1.4.img bs=512 seek=18 count=2 2> /dev/null
-dd if=./temp/stone_topright.bin of=JedOS_v1.4.img bs=512 seek=20 count=2 2> /dev/null
-dd if=./temp/stone_bottomleft.bin of=JedOS_v1.4.img bs=512 seek=22 count=2 2> /dev/null
-dd if=./temp/stone_bottomright.bin of=JedOS_v1.4.img bs=512 seek=24 count=2 2> /dev/null
-dd if=./temp/interrupt_caller.bin of=JedOS_v1.4.img bs=512 seek=26 count=1 2> /dev/null
-dd if=./temp/syscall_test.bin of=JedOS_v1.4.img bs=512 seek=27 count=3 2> /dev/null
+dd if=./temp/kernel.bin of=JedOS_v1.4.img bs=512 seek=2 count=34 2> /dev/null
+dd if=./temp/stone_topleft.bin of=JedOS_v1.4.img bs=512 seek=36 count=2 2> /dev/null
+dd if=./temp/stone_topright.bin of=JedOS_v1.4.img bs=512 seek=38 count=2 2> /dev/null
+dd if=./temp/stone_bottomleft.bin of=JedOS_v1.4.img bs=512 seek=40 count=2 2> /dev/null
+dd if=./temp/stone_bottomright.bin of=JedOS_v1.4.img bs=512 seek=42 count=2 2> /dev/null
+dd if=./temp/interrupt_caller.bin of=JedOS_v1.4.img bs=512 seek=44 count=1 2> /dev/null
+dd if=./temp/syscall_test.bin of=JedOS_v1.4.img bs=512 seek=45 count=3 2> /dev/null
 
 
 echo "[+] Done."

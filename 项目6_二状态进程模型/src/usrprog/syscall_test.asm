@@ -120,6 +120,6 @@ DataArea:
 
     upper_lower db 'AbCdEfGhIjKlMn', 0 ; 字符串以'\0'结尾
 
-    number_buf db '12345', 0           ; 字符串以'\0'结尾
-    test_message1 db 'This is a test message,'
-    test_message2 db 'printed using `ah=05h` and `int 21h`.'
+    number_buf db '12345', 0, 0        ; 字符串以'\0'结尾
+    test_message1 db 'This is a test message,', 0
+    test_message2 db 'printed using `ah=05h` and `int 21h`.', 0
