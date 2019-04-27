@@ -15,6 +15,7 @@ extern void print(const char* str);
 extern char* itoa(int val, int base);
 extern void putchar(char c);
 #define NEWLINE putchar('\r');putchar('\n')
+void debug_printpcb();
 //--------
 PCB PCB_table[MAX_PROCESS_NUM + 1];  // 进程表
 bool PCB_valid[MAX_PROCESS_NUM + 1] = {false};
@@ -63,6 +64,7 @@ void PCBsave(int ax, int bx, int cx, int dx, int bp, int si, int di, int ds, int
 	PCB_table[current_process_id].regimg.ip = ip;
 	PCB_table[current_process_id].regimg.cs = cs;
 	PCB_table[current_process_id].regimg.flags = flags;
+    debug_printpcb();
 }
 
 /* 用程序编号创建进程 */

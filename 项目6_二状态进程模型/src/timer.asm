@@ -87,7 +87,6 @@ Timer:                    ; debug:sp=346h
     add sp, 4*16          ; 丢弃参数
 
     call dword PCBscheduler
-    ; call dword debug_printpcb
     ; destroy reg begin
     ; destroy end
 

@@ -22,7 +22,7 @@ SetTimer:
     mov al,ah                       ; AL=AH
     out 40h,al                      ; 写计数器0的高字节
     MOVE_INT_VECTOR 08h, 38h        ; 转移原始的时钟中断
-    WRITE_INT_VECTOR 48h, Timer     ; 装填时钟中断向量表
+    WRITE_INT_VECTOR 08h, Timer     ; 装填时钟中断向量表
 
     call dword startUp              ; 进入欢迎界面
 

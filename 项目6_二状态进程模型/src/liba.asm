@@ -341,8 +341,7 @@ processLoadProg:
     popa
     retf
 
-[extern process_timer]
-setProcessTimer:
-    mov byte[process_timer], 1
-    int 48h
-    retf
+; [extern process_timer]
+; setProcessTimer:
+;     mov byte[process_timer], 1
+;     retf
