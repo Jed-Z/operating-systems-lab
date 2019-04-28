@@ -67,9 +67,8 @@ void PCBsave(int gs,int fs,int es,int ds,int di,int si,int bp, int sp,int dx,int
 
 /* 用程序编号创建进程 */
 void process_create(int progid) {
-    int id;
     processLoadProg(getUsrProgCylinder(progid), getUsrProgHead(progid), getUsrProgSector(progid), getUsrProgSize(progid)/512, getUsrProgAddrSeg(progid), getUsrProgAddrOff(progid));
-    PCBinit(id, getUsrProgAddrSeg(progid));
+    PCBinit(progid, getUsrProgAddrSeg(progid));
     Program_Num++;
 }
 
@@ -93,3 +92,6 @@ void special()
 	if(PCB_table[current_process_id].status == P_NEW)
 		PCB_table[current_process_id].status=P_RUNNING;
 }
+
+
+#include "debug.h"

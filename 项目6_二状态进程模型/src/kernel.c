@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-27
+ * @LastEditTime: 2019-04-28
  */
 #include "stringio.h"
 #include "pcb.h"
@@ -159,6 +159,7 @@ void runMultiple(char* cmdstr) {
             break;
         }
     }
+    
     if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
         int i = 0;
         for(int i = 0; progids[i] != '\0'; i++) {
@@ -166,7 +167,6 @@ void runMultiple(char* cmdstr) {
                 int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
                 process_create(progid_to_run);
             }
-            Delay();//debug
         }
         const char* hint = "Processes terminated.\r\n";
         print(hint);
@@ -209,6 +209,7 @@ void shell() {
         }
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
             runMultiple(cmdstr);
+            Delay();//debug
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();
