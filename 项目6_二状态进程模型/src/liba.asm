@@ -341,7 +341,9 @@ processLoadProg:
     popa
     retf
 
-; [extern process_timer]
-; setProcessTimer:
-;     mov byte[process_timer], 1
-;     retf
+
+;debug
+global debug_int48
+debug_int48:
+    int 48h
+    retf

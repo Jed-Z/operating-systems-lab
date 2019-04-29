@@ -6,10 +6,10 @@ BITS 16
 [extern special]
 [extern Program_Num]
 
-;debug
+; debug
 extern debug_printreg
 extern debug_printpcb
-;debugend
+; debugend
 
 %macro debug 0
 pusha                     ; sp -= 16bytes
@@ -48,17 +48,15 @@ popa
 
 Timer:
     cmp word[cs:Program_Num], 0
-    jnz Save
-    jmp No_Progress
+    je No_Progress
 
 Save:
-debug
-	inc word[Finite]
-	cmp word[Finite],1600
-	jnz Lee 
-	mov word[Finite],0
-	mov word[Program_Num],0
-	jmp Pre
+; inc word[Finite]
+; cmp word[Finite],1600
+; jnz Lee
+; mov word[Finite],0
+; mov word[Program_Num],0
+; jmp Pre
 
 Lee:
     pop word[cs:tempip]
@@ -112,15 +110,15 @@ Pre:
     mov ss, [cs:bp+0]
     mov sp, [cs:bp+16]
 
-    cmp word[cs:bp+32],0
+    cmp word[cs:bp+32],0  ; state == 0 ?
     jnz No_First_Time
 
 Restart:
-    call dword special
+    call dword special    ; if P_NEW: then set to P_RUNNING
 
-    push word[cs:bp+30]   ; flags
-    push word[cs:bp+28]   ; cs
-    push word[cs:bp+26]   ; ip
+    push word[cs:bp+2*15] ; flags
+    push word[cs:bp+2*14] ; cs
+    push word[cs:bp+2*13] ; ip
 
     push word[cs:bp+2]
     push word[cs:bp+4]
@@ -145,24 +143,26 @@ Restart:
     pop fs
     pop gs
 
-	push ax         
-	mov al,20h
-	out 20h,al
-	out 0A0h,al
-	pop ax
-	iret
-No_First_Time:	
-	add sp,16*2
-	jmp Restart
+    push ax
+    mov al,20h
+    out 20h,al
+    out 0A0h,al
+    pop ax
+    iret
+
+No_First_Time:
+    add sp,16*4
+    jmp Restart
+
 No_Progress:
-	push ax         
-	mov al,20h
-	out 20h,al
-	out 0A0h,al
-	pop ax
-	iret
+    push ax
+    mov al,20h
+    out 20h,al
+    out 0A0h,al
+    pop ax
+    iret
 
     temppsw dw 0
     tempcs dw 0
     tempip dw 0
-    Finite dw 0	
+    Finite dw 0

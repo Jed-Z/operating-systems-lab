@@ -26,13 +26,13 @@ int Program_Num = 0;
 
 void PCBinit(int id, int seg) {
     if(id > 0 && id < MAX_PROCESS_NUM) {
-        PCB_table[id].regimg.gs = 0xb800;
+        PCB_table[id].regimg.gs = 0xB800;
         PCB_table[id].regimg.ss = seg;
         PCB_table[id].regimg.es = seg;
         PCB_table[id].regimg.ds = seg;
         PCB_table[id].regimg.cs = seg;
         PCB_table[id].regimg.fs = seg;
-        PCB_table[id].regimg.ip = 0;
+        PCB_table[id].regimg.ip = 0x100;
         PCB_table[id].regimg.sp = -4;
         PCB_table[id].regimg.ax = 0;
         PCB_table[id].regimg.bx = 0;
@@ -75,7 +75,7 @@ void process_create(int progid) {
 void PCBscheduler() {
 	PCB_table[current_process_id].status = P_READY;
 
-	current_process_id ++;
+	current_process_id++;
 	if( current_process_id > Program_Num )
 		current_process_id = 1;
 

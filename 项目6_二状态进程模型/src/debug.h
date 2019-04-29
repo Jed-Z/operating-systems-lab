@@ -48,6 +48,7 @@ void debug_printpcb() {
     print(itoa(PCB_table[current_process_id].regimg.bx, 16)); putchar(' ');
     print(itoa(PCB_table[current_process_id].regimg.ax, 16)); NEWLINE;
     
-    char* end = "###reg end###\r\n\r\n";
+    print(itoa(PCB_table[current_process_id].status, 10));
+    char* end = " is state\r\n###reg end###\r\n\r\n";
     print(end);
 }

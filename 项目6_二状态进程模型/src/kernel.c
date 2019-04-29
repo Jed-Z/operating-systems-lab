@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-28
+ * @LastEditTime: 2019-04-29
  */
 #include "stringio.h"
 #include "pcb.h"
@@ -32,6 +32,7 @@ extern uint8_t bcd2decimal(uint8_t bcd);
 // extern void setProcessTimer();
 extern void PCBscheduler();
 void Delay();//debug
+extern void debug_int48();//debug
 
 /* 系统启动界面 */
 void startUp() {
@@ -167,6 +168,7 @@ void runMultiple(char* cmdstr) {
                 int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
                 process_create(progid_to_run);
             }
+            debug_int48();
         }
         const char* hint = "Processes terminated.\r\n";
         print(hint);
@@ -209,7 +211,7 @@ void shell() {
         }
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
             runMultiple(cmdstr);
-            Delay();//debug
+            // Delay();//debug
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();
