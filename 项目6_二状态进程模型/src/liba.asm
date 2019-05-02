@@ -20,7 +20,6 @@ BITS 16
 [global getUsrProgAddrSeg]
 [global getUsrProgAddrOff]
 [global loadAndRun]
-[global processLoadProg]
 [global getDateYear]
 [global getDateMonth]
 [global getDateDay]
@@ -28,8 +27,6 @@ BITS 16
 [global getDateMinute]
 [global getDateSecond]
 [global syscaller]
-[global setProcessTimer]
-[global PCBrestart]
 
 
 clearScreen:                ; 函数：清屏
@@ -309,6 +306,31 @@ getDateSecond:              ; 函数：从CMOS获取当前秒钟
     mov ah, 0
     retf
 
+extern create_new_PCB
+extern current_seg
+extern sector_number
+global run_process
+run_process:
+	push es
+	
+	mov ax, word[cs:current_seg]
+	mov es, ax
+	mov bx, 100h
+	mov ah, 2
+	mov al, 2
+	mov dl, 0
+	mov dh, 0
+	mov ch, 1
+	mov cl, byte[cs:sector_number]
+	int 13h
+    push word[cs:current_seg]
+    push 0x100
+    retf
+
+	call dword create_new_PCB
+	
+	pop es
+	ret
 
 [extern sys_showOuch]
 [extern sys_toUpper]
@@ -332,18 +354,189 @@ syscaller:
         dw sys_showOuch, sys_toUpper, sys_toLower
         dw sys_atoi, sys_itoa, sys_printInPos
 
+set_timer:
+	push ax
+	mov al, 36h
+	out 43h, al
+	mov ax, 11931		;频率为100Hz
+	out 40h, al
+	mov al, ah
+	out 40h, al
+	pop ax
+	ret
+global set_clock
+set_clock:
+	push es
+	call set_timer
+	xor ax, ax
+	mov es, ax
+	mov word[es:20h], Timer
+	mov word[es:22h], cs
+	pop es
+	ret
 
-processLoadProg:
-    pusha
-    mov bp, sp
-    add bp, 16+4            ; 参数地址
-    LOAD_TO_MEM [bp+12], [bp], [bp+4], [bp+8], [bp+16], [bp+20]
-    popa
-    retf
+extern kernal_mode
+extern save_PCB
+extern schedule
+extern get_current_process_PCB
+extern first_time
+Timer:
+	cmp word[cs:kernal_mode], 1
+	je kernal_timer
+process_timer:
+    pop word[cs:temp_ip]
+    pop word[cs:temp_cs]
+    pop word[cs:temp_flags]
+    push 0
+    push word[cs:temp_flags]
+    push 0
+    push word[cs:temp_cs]
+    push 0
+    push word[cs:temp_ip]
+	push 0
+    push ss
+	push 0
+    push gs
+	push 0
+    push fs
+	push 0
+    push es
+	push 0
+    push ds
+	push 0
+    push di
+	push 0
+    push si
+	push 0
+    push bp
+	push 0
+    push sp
+	push 0
+    push dx
+	push 0
+    push cx
+	push 0
+    push bx
+	push 0
+    push ax
 
+    cmp word[cs:back_time], 0
+	jnz time_to_go
+	mov word[cs:back_time], 1
+	mov word[cs:kernal_mode], 1
+	add sp, 11*2
+	push 512
+	push 0
+	push 8000h
+	iret
 
-;debug
-global debug_int48
-debug_int48:
-    int 48h
-    retf
+time_to_go:
+	inc word[cs:back_time]
+	mov ax, cs
+	mov ds, ax
+	mov es, ax
+	call dword save_PCB
+	call dword schedule
+
+store_PCB:
+	mov ax, cs
+	mov ds, ax
+	call get_current_process_PCB
+	mov si, ax
+	mov ss, word[cs:si]
+	mov sp, word[cs:si+2*7]
+	cmp word[first_time], 1
+	jnz next_time
+	mov word[first_time], 0
+	jmp start_PCB
+	
+next_time:
+	add sp, 11*2						
+	
+start_PCB:
+	mov ax, 0
+	push word[cs:si+2*15]
+	push word[cs:si+2*14]
+	push word[cs:si+2*13]
+	
+	mov ax, word[cs:si+2*12]
+	mov cx, word[cs:si+2*11]
+	mov dx, word[cs:si+2*10]
+	mov bx, word[cs:si+2*9]
+	mov bp, word[cs:si+2*8]
+	mov di, word[cs:si+2*5]
+	mov es, word[cs:si+2*3]
+	mov fs, word[cs:si+2*2]
+	mov gs, word[cs:si+2*1]
+	push word[cs:si+2*4]
+	push word[cs:si+2*6]
+	pop si
+	pop cs
+	
+process_timer_end:
+	push ax
+	mov al, 20h
+	out 20h, al
+	out 0A0h, al
+	pop ax
+	iret
+kernal_timer:
+    push es
+	push ds
+	
+	dec byte [es:cccount]		    ;递减计数变量
+	jnz fin								; >0 跳转
+	inc byte [es:tmp]				;自增tmp
+	cmp byte [es:tmp], 1			;根据tmp选择显示内容
+	jz ch1								;1显示‘/’
+	cmp byte [es:tmp], 2			;2显示‘|’
+	jz ch2
+	cmp byte [es:tmp], 3			;3显示‘\’
+	jz ch3
+	cmp byte [es:tmp], 4			;4显示‘-’
+	jz ch4
+	
+ch1:
+	mov bl, '/'
+	jmp showch
+	
+ch2:
+	mov bl, '|'
+	jmp showch
+	
+ch3:
+    mov bl, '\'
+	jmp showch
+	
+ch4:
+	mov byte [es:tmp],0
+	mov bl, '-'
+	jmp showch
+	
+showch:
+	push gs
+	mov	ax,0B800h				; 文本窗口显存起始地址
+	mov	gs,ax					; GS = B800h
+	mov ah,0Fh
+	mov al,bl
+	mov word[gs:((80 * 24 + 78) * 2)], ax
+	pop gs    
+	mov byte[es:cccount],8
+	
+fin:
+	mov al,20h					        ; AL = EOI
+	out 20h,al						    ; 发送EOI到主8529A
+	out 0A0h,al					        ; 发送EOI到从8529A
+	
+	pop ds
+	pop es                              ; 恢复寄存器信息
+	iret		
+	
+	cccount db 8					     ; 计时器计数变量，初值=8
+	tmp db 0
+
+    temp_flags dw 0
+    temp_cs dw 0
+    temp_ip dw 0
+
+    back_time dw 1

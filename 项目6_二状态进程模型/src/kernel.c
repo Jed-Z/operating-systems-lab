@@ -2,10 +2,10 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-04-29
+ * @LastEditTime: 2019-05-02
  */
-#include "stringio.h"
 #include "pcb.h"
+#include "stringio.h"
 #define BUFLEN 16
 #define NEWLINE putchar('\r');putchar('\n')
 #define OS_VERSION "1.4"
@@ -29,17 +29,15 @@ extern uint8_t getDateHour();
 extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
-// extern void setProcessTimer();
-extern void PCBscheduler();
-void Delay();//debug
-extern void debug_int48();//debug
+extern void run_process();
+char sector_number;
 
 /* 系统启动界面 */
 void startUp() {
     clearScreen();
     const char* title = "JedOS v" OS_VERSION;
     const char* subtitle = "Zhang Yixin, 17341203";
-    const char* date = "2019-04-26";
+    const char* date = "2019-05-04";
     const char* hint = "System has been loaded successfully. Press ENTER to start shell.";
     printInPos(title, strlen(title), 5, 35);
     printInPos(subtitle, strlen(subtitle), 6, 29);
@@ -145,48 +143,43 @@ void batch(char* cmdstr) {
     }
 }
 
-/* 多进程执行程序 */
-void runMultiple(char* cmdstr) {
-    char progids[BUFLEN+1];
-    getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
-    uint8_t isvalid = 1;  // 参数有效标志位
-    for(int i = 0; progids[i]; i++) {  // 判断参数是有效的
-        if(!isnum(progids[i]) && progids[i]!=' ') {  // 既不是数字又不是空格，无效参数
-            isvalid = 0;
-            break;
-        }
-        if(isnum(progids[i]) && progids[i]-'0'>getUsrProgNum()) {
-            isvalid = 0;
-            break;
-        }
-    }
+void create_process(char *comm) {
+	int i, sum = 0, flag = 0;
+	for (i = 1; i < strlen(comm); ++i) {
+		if (comm[i] == ' ' || comm[i] >= '1' && comm[i] <= '4') continue;
+		else {
+            const char* fuckthis = "  invalid program number: ";
+			print(fuckthis);
+			putchar(comm[i]);
+			return;
+		}
+	}
+	for (i = 1; i < strlen(comm); ++i) {
+		if (comm[i] != ' ') flag = 1;
+	}
+	if (flag == 0) {
+        const char* fuckthat = "  invalid input\n\n\r";
+		print(fuckthat);
+		return;
+	}
+
+    current_seg = 0x1000;
+    sector_number = 1;
+    run_process();
     
-    if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
-        int i = 0;
-        for(int i = 0; progids[i] != '\0'; i++) {
-            if(isnum(progids[i])) {  // 是数字（不是空格）
-                int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
-                process_create(progid_to_run);
-            }
-            debug_int48();
-        }
-        const char* hint = "Processes terminated.\r\n";
-        print(hint);
-    }
-    else {  // 参数无效，报错，不执行任何用户程序
-        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to ";
-        print(error_msg);
-        print(itoa(getUsrProgNum(), 10));
-        putchar('.');
-        NEWLINE;
-    }
+    current_seg = 0x2000;
+    sector_number = 3;
+    run_process();
+
+    current_seg = 0x3000;
+	kernal_mode = 0;
 }
+
 
 /* 操作系统shell */
 void shell() {
     clearScreen();
     showHelp();
-    
     char cmdstr[BUFLEN+1] = {0};  // 用于存放用户输入的命令和参数
     char cmd_firstword[BUFLEN+1] = {0};  // 用于存放第一个空格之前的子串
     enum command             { help,   clear,   list,   bat,   run,   poweroff,    reboot,   date};
@@ -210,8 +203,7 @@ void shell() {
             batch(cmdstr);
         }
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
-            runMultiple(cmdstr);
-            // Delay();//debug
+        create_process(&cmdstr[2]);
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();
@@ -230,16 +222,4 @@ void shell() {
             }
         }
     }
-}
-
-void Delay()
-{
-	int i = 0;
-	int j = 0;
-	for( i=0;i<30000;i++ )
-		for( j=0;j<30000;j++ )
-		{
-			j++;
-			j--;
-		}
 }

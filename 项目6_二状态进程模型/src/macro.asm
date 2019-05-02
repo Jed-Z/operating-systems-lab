@@ -1,12 +1,12 @@
 addr_upinfo equ 07E00h      ; 用户程序信息表被装入的位置
 addr_oskernel equ 08000h    ; 操作系统内核被装入的位置
 
-addr_usrprog1 equ 10000h
-addr_usrprog2 equ 20000h
-addr_usrprog3 equ 30000h
-addr_usrprog4 equ 40000h
-addr_intcaller equ 50000h
-addr_syscalltest equ 60000h
+addr_usrprog1 equ 10100h
+addr_usrprog2 equ 20100h
+addr_usrprog3 equ 30100h
+addr_usrprog4 equ 40100h
+addr_intcaller equ 50100h
+addr_syscalltest equ 60100h
 
 %macro WRITE_INT_VECTOR 2   ; 写中断向量表；参数：（中断号，中断处理程序地址）
     push ax
