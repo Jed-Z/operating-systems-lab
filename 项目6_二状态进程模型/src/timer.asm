@@ -97,21 +97,19 @@ Lee:
 
 
     call dword PCBsave
-    ; add sp, 4*16
+    add sp, 4*16
     call dword PCBscheduler
 
 Pre:
-    mov ax, cs
-    mov es, ax
 
     call dword getCurrentRegImg
     mov bp, ax
 
-    mov ss, [cs:bp+0]
+    mov ss, [cs:bp+0]     ; 栈切换
     mov sp, [cs:bp+16]
 
-    cmp word[cs:bp+32],0  ; state == 0 ?
-    jnz No_First_Time
+    ; cmp word[cs:bp+32],0  ; state == 0 ?
+    ; jnz No_First_Time
 
 Restart:
     call dword special    ; if P_NEW: then set to P_RUNNING
@@ -120,28 +118,28 @@ Restart:
     push word[cs:bp+2*14] ; cs
     push word[cs:bp+2*13] ; ip
 
-    push word[cs:bp+2]
-    push word[cs:bp+4]
-    push word[cs:bp+6]
-    push word[cs:bp+8]
-    push word[cs:bp+10]
-    push word[cs:bp+12]
-    push word[cs:bp+14]
-    push word[cs:bp+18]
-    push word[cs:bp+20]
-    push word[cs:bp+22]
-    push word[cs:bp+24]
-    pop ax
-    pop cx
-    pop dx
-    pop bx
-    pop bp
-    pop si
-    pop di
-    pop ds
-    pop es
-    pop fs
-    pop gs
+    ; push word[cs:bp+2]
+    ; push word[cs:bp+4]
+    ; push word[cs:bp+6]
+    ; push word[cs:bp+8]
+    ; push word[cs:bp+10]
+    ; push word[cs:bp+12]
+    ; push word[cs:bp+14]
+    ; push word[cs:bp+18]
+    ; push word[cs:bp+20]
+    ; push word[cs:bp+22]
+    ; push word[cs:bp+24]
+    ; pop ax
+    ; pop cx
+    ; pop dx
+    ; pop bx
+    ; pop bp
+    ; pop si
+    ; pop di
+    ; pop ds
+    ; pop es
+    ; pop fs
+    ; pop gs
 
     push ax
     mov al,20h
@@ -151,7 +149,6 @@ Restart:
     iret
 
 No_First_Time:
-    add sp,16*4
     jmp Restart
 
 No_Progress:
