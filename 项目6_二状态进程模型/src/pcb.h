@@ -1,118 +1,146 @@
-#ifndef _PCB_
-#define _PCB_
+#include "stringio.h"
+extern uint16_t temppcb_ss;
+extern uint16_t temppcb_gs;
+extern uint16_t temppcb_fs;
+extern uint16_t temppcb_es;
+extern uint16_t temppcb_ds;
+extern uint16_t temppcb_di;
+extern uint16_t temppcb_si;
+extern uint16_t temppcb_bp;
+extern uint16_t temppcb_sp;
+extern uint16_t temppcb_bx;
+extern uint16_t temppcb_dx;
+extern uint16_t temppcb_cx;
+extern uint16_t temppcb_ax;
+extern uint16_t temppcb_ip;
+extern uint16_t temppcb_cs;
+extern uint16_t temppcb_flags;
 
-#define MAX_PCB_NUMBER 8
+int timer_flag = 0;
 
-typedef enum PCB_STATUS{PCB_READY, PCB_EXIT, PCB_RUNNING, PCB_BLOCKED} PCB_STATUS;
-
-typedef struct Register{
-	int ss;
-	int gs;
-	int fs;
-	int es;
-	int ds;
-	int di;
-	int si;
-	int sp;
-	int bp;
-	int bx;
-	int dx;
-	int cx;
-	int ax;
-	int ip;
-	int cs;
-	int flags;
-} Register;
+typedef struct RegisterImage{
+	int ss;     // 0
+	int gs;     // 1
+	int fs;     // 2
+	int es;     // 3
+	int ds;     // 4
+	int di;     // 5
+	int si;     // 6
+	int bp;     // 7
+	int sp;     // 8
+	int bx;     // 9
+	int dx;     // 10
+	int cx;     // 11
+	int ax;     // 12
+	int ip;     // 13
+	int cs;     // 14
+	int flags;  // 15
+} RegisterImage;
 
 typedef struct PCB{
-	Register regs;
-	PCB_STATUS status;
-	int ID;
+	RegisterImage regimg;
+	int state;
 } PCB;
 
-PCB PCB_LIST[MAX_PCB_NUMBER];
+PCB pcb_table[3];
+int current_process_id = 0;
 
-PCB *current_process_PCB_ptr;
 
-int first_time;
-int kernal_mode = 1;
-int process_number = 0;
-int current_seg = 0x1000;
+void debug_init() {
+    pcb_table[0].regimg.ax = 0;
+	pcb_table[0].regimg.bx = 0;
+	pcb_table[0].regimg.cx = 0;
+	pcb_table[0].regimg.dx = 0;
+	pcb_table[0].regimg.ds = 0;
+	pcb_table[0].regimg.es = 0;
+	pcb_table[0].regimg.fs = 0;
+	pcb_table[0].regimg.gs = 0;
+	pcb_table[0].regimg.ss = 0;
+	pcb_table[0].regimg.ip = 0;
+	pcb_table[0].regimg.cs = 0;
+	pcb_table[0].regimg.flags = 512;
+	pcb_table[0].regimg.di = 0;
+	pcb_table[0].regimg.si = 0;
+	pcb_table[0].regimg.sp = 0;
+	pcb_table[0].regimg.bp = 0;
 
-int current_process_number = 0;
+	pcb_table[1].regimg.ax = 0;
+	pcb_table[1].regimg.bx = 0;
+	pcb_table[1].regimg.cx = 0;
+	pcb_table[1].regimg.dx = 0;
+	pcb_table[1].regimg.ds = 0x1000;
+	pcb_table[1].regimg.es = 0x1000;
+	pcb_table[1].regimg.fs = 0x1000;
+	pcb_table[1].regimg.gs = 0x1000;
+	pcb_table[1].regimg.ss = 0x1000;
+	pcb_table[1].regimg.ip = 0x100;
+	pcb_table[1].regimg.cs = 0x1000;
+	pcb_table[1].regimg.flags = 512;
+	pcb_table[1].regimg.di = 0;
+	pcb_table[1].regimg.si = 0;
+	pcb_table[1].regimg.sp = 0x100-4;
+	pcb_table[1].regimg.bp = 0;
 
-PCB *get_current_process_PCB() {
-	return &PCB_LIST[current_process_number];
+	pcb_table[2].regimg.ax = 0xaaaa;
+	pcb_table[2].regimg.bx = 0;
+	pcb_table[2].regimg.cx = 0;
+	pcb_table[2].regimg.dx = 0;
+	pcb_table[2].regimg.ds = 0x2000;
+	pcb_table[2].regimg.es = 0x2000;
+	pcb_table[2].regimg.fs = 0x2000;
+	pcb_table[2].regimg.gs = 0x2000;
+	pcb_table[2].regimg.ss = 0x2000;
+	pcb_table[2].regimg.ip = 0x100;
+	pcb_table[2].regimg.cs = 0x2000;
+	pcb_table[2].regimg.flags = 512;
+	pcb_table[2].regimg.di = 0;
+	pcb_table[2].regimg.si = 0;
+	pcb_table[2].regimg.sp = 0x100-4;
+	pcb_table[2].regimg.bp = 0;
 }
 
-void save_PCB(int ax, int bx, int cx, int dx, int sp, int bp, int si, int di, int ds, int es, int fs, int gs, int ss, int ip, int cs, int flags) {
-	current_process_PCB_ptr = get_current_process_PCB();
-	
-	current_process_PCB_ptr->regs.ss = ss;
-	current_process_PCB_ptr->regs.gs = gs;
-	current_process_PCB_ptr->regs.fs = fs;
-	current_process_PCB_ptr->regs.es = es;
-	current_process_PCB_ptr->regs.ds = ds;
-	current_process_PCB_ptr->regs.di = di;
-	current_process_PCB_ptr->regs.si = si;
-	current_process_PCB_ptr->regs.sp = sp;
-	current_process_PCB_ptr->regs.bp = bp;
-	current_process_PCB_ptr->regs.bx = bx;
-	current_process_PCB_ptr->regs.dx = dx;
-	current_process_PCB_ptr->regs.cx = cx;
-	current_process_PCB_ptr->regs.ax = ax;
-	current_process_PCB_ptr->regs.ip = ip;
-	current_process_PCB_ptr->regs.cs = cs;
-	current_process_PCB_ptr->regs.flags = flags;
+void pcbSave(int gs,int fs,int es,int ds,int di,int si,int bp, int sp,
+            int dx,int cx,int bx,int ax,int ss,int ip,int cs,int flags) {
+	pcb_table[current_process_id].regimg.ss = ss;
+	pcb_table[current_process_id].regimg.gs = gs;
+	pcb_table[current_process_id].regimg.fs = fs;
+	pcb_table[current_process_id].regimg.es = es;
+	pcb_table[current_process_id].regimg.ds = ds;
+	pcb_table[current_process_id].regimg.di = di;
+	pcb_table[current_process_id].regimg.si = si;
+	pcb_table[current_process_id].regimg.bp = bp;
+	pcb_table[current_process_id].regimg.sp = sp;
+	pcb_table[current_process_id].regimg.bx = bx;
+	pcb_table[current_process_id].regimg.dx = dx;
+	pcb_table[current_process_id].regimg.cx = cx;
+	pcb_table[current_process_id].regimg.ax = ax;
+	pcb_table[current_process_id].regimg.ip = ip;
+	pcb_table[current_process_id].regimg.cs = cs;
+	pcb_table[current_process_id].regimg.flags = flags;
 }
 
 void schedule() {
-	if (current_process_PCB_ptr->status == PCB_READY) {
-		first_time = 1;
-		current_process_PCB_ptr->status = PCB_RUNNING;
-		return;
-	}
-	current_process_PCB_ptr->status = PCB_BLOCKED;
-	current_process_number++;
-	if (current_process_number >= process_number) current_process_number = 0;
-	current_process_PCB_ptr = get_current_process_PCB();
-	if (current_process_PCB_ptr->status == PCB_READY) first_time = 1;
-	current_process_PCB_ptr->status = PCB_RUNNING;
-	return;
+	current_process_id = 0;
+	temppcb_ss =  pcb_table[current_process_id].regimg.ss;
+	temppcb_gs =  pcb_table[current_process_id].regimg.gs;
+	temppcb_fs =  pcb_table[current_process_id].regimg.fs;
+	temppcb_es =  pcb_table[current_process_id].regimg.es;
+	temppcb_ds =  pcb_table[current_process_id].regimg.ds;
+	temppcb_di =  pcb_table[current_process_id].regimg.di;
+	temppcb_si =  pcb_table[current_process_id].regimg.si;
+	temppcb_bp =  pcb_table[current_process_id].regimg.bp;
+	temppcb_sp =  pcb_table[current_process_id].regimg.sp;
+	temppcb_bx =  pcb_table[current_process_id].regimg.bx;
+	temppcb_dx =  pcb_table[current_process_id].regimg.dx;
+	temppcb_cx =  pcb_table[current_process_id].regimg.cx;
+	temppcb_ax =  pcb_table[current_process_id].regimg.ax;
+	temppcb_ip =  pcb_table[current_process_id].regimg.ip;
+	temppcb_cs =  pcb_table[current_process_id].regimg.cs;
+	temppcb_flags =  pcb_table[current_process_id].regimg.flags;
 }
 
-void PCB_initial(PCB *ptr, int process_ID, int seg) {
-	ptr->ID = process_ID;
-	ptr->status = PCB_READY;
-	ptr->regs.gs = 0x0B800;
-	ptr->regs.es = seg;
-	ptr->regs.ds = seg;
-	ptr->regs.fs = seg;
-	ptr->regs.ss = seg;
-	ptr->regs.cs = seg;
-	ptr->regs.di = 0;
-	ptr->regs.si = 0;
-	ptr->regs.bp = 0;
-	ptr->regs.sp = 0x0100 - 4;
-	ptr->regs.bx = 0;
-	ptr->regs.ax = 0;
-	ptr->regs.cx = 0;
-	ptr->regs.dx = 0;
-	ptr->regs.ip = 0x0100;
-	ptr->regs.flags = 512;
+void debug_showreg(uint16_t reg) {
+	print(itoa(reg, 16));
+	char* end = "###reg end###\r\n\r\n";
+	print(end);
 }
-
-void create_new_PCB() {
-	if (process_number > MAX_PCB_NUMBER) return;
-	PCB_initial(&PCB_LIST[process_number], process_number, current_seg);
-	process_number++;
-	current_seg += 0x1000;
-}
-
-void initial_PCB_settings() {
-	process_number = 0;
-	current_process_number = 0;
-	current_seg = 0x1000;
-}
-
-#endif

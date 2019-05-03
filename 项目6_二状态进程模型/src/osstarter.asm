@@ -17,7 +17,13 @@ _start:
     WRITE_INT_VECTOR 21h, syscaller ; 装填系统调用中断向量表
 
 SetTimer:
-    call set_clock
+    mov al,34h                      ; 设控制字值
+    out 43h,al                      ; 写控制字到控制字寄存器
+    mov ax,29830                    ; 每秒 20 次中断（50ms 一次）
+    out 40h,al                      ; 写计数器 0 的低字节
+    mov al,ah                       ; AL=AH
+    out 40h,al                      ; 写计数器 0 的高字节
+    WRITE_INT_VECTOR 08h, Timer
     call dword startUp              ; 进入欢迎界面
 
 Keyboard:

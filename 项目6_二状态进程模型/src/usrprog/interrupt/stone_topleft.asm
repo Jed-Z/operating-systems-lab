@@ -179,7 +179,6 @@ show:
 skip:
     mov al,byte[char]      ; AL = 显示字符值（默认值为20h=空格符）
     mov word[gs:bp],ax     ; 显示字符的ASCII码值
-    
     mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
     int 16h
     jz continue            ; 无键盘按下，继续

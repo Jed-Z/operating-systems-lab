@@ -3,7 +3,7 @@
 ; 说明：本程序是jed_stone.asm的改版。本程序在显示器左上角进行字符反弹。
 ; 参数：(39, -1, 80, 13, 40, 7)
 %include "../macro.asm"
-org addr_usrprog1 & 0FFFFh
+org addr_usrprog2 & 0FFFFh
 
     Dn_Rt equ 1            ; D-Down,U-Up,R-right,L-Left
     Up_Rt equ 2
@@ -12,11 +12,11 @@ org addr_usrprog1 & 0FFFFh
     delay equ 50000        ; 计时器延迟计数,用于控制画框的速度
     ddelay equ 580         ; 计时器延迟计数,用于控制画框的速度
 
-    screen_left equ -1     ; 字符运动左边界
+    screen_left equ 39     ; 字符运动左边界
     screen_top equ -1      ; 字符运动上边界
-    screen_right equ 40    ; 字符运动右边界
+    screen_right equ 80    ; 字符运动右边界
     screen_bottom equ 13   ; 字符运动下边界
-    originpos_y equ 0      ; 起点列数
+    originpos_y equ 40     ; 起点列数
     originpos_x equ 7      ; 起点行数
 
 start:
@@ -179,7 +179,7 @@ show:
 skip:
     mov al,byte[char]      ; AL = 显示字符值（默认值为20h=空格符）
     mov word[gs:bp],ax     ; 显示字符的ASCII码值
-    
+
     mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
     int 16h
     jz continue            ; 无键盘按下，继续
@@ -221,7 +221,7 @@ DataArea:
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    hint1 db 'This is user program 1. Press ESC to exit.'
+    hint1 db 'This is user program 2. Press ESC to exit.'
     hint1len equ ($-hint1)
 
 %include "interrupt/intouch.asm"

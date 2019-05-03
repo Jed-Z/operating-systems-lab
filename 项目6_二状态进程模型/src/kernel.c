@@ -2,12 +2,11 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-02
+ * @LastEditTime: 2019-05-03
  */
 #include "pcb.h"
 #include "stringio.h"
 #define BUFLEN 16
-#define NEWLINE putchar('\r');putchar('\n')
 #define OS_VERSION "1.4"
 
 extern void clearScreen();
@@ -29,8 +28,9 @@ extern uint8_t getDateHour();
 extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
-extern void run_process();
-char sector_number;
+extern void loadProcessMem();
+
+extern void debug_int48h();
 
 /* 系统启动界面 */
 void startUp() {
@@ -142,39 +142,16 @@ void batch(char* cmdstr) {
         NEWLINE;
     }
 }
+void Multiprocessing() {
+    int progid_to_run = 1;
+    loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
+    progid_to_run = 2;
+    loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
 
-void create_process(char *comm) {
-	int i, sum = 0, flag = 0;
-	for (i = 1; i < strlen(comm); ++i) {
-		if (comm[i] == ' ' || comm[i] >= '1' && comm[i] <= '4') continue;
-		else {
-            const char* fuckthis = "  invalid program number: ";
-			print(fuckthis);
-			putchar(comm[i]);
-			return;
-		}
-	}
-	for (i = 1; i < strlen(comm); ++i) {
-		if (comm[i] != ' ') flag = 1;
-	}
-	if (flag == 0) {
-        const char* fuckthat = "  invalid input\n\n\r";
-		print(fuckthat);
-		return;
-	}
+    debug_init();
 
-    current_seg = 0x1000;
-    sector_number = 1;
-    run_process();
-    
-    current_seg = 0x2000;
-    sector_number = 3;
-    run_process();
-
-    current_seg = 0x3000;
-	kernal_mode = 0;
+    timer_flag = 1;
 }
-
 
 /* 操作系统shell */
 void shell() {
@@ -203,7 +180,7 @@ void shell() {
             batch(cmdstr);
         }
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
-        create_process(&cmdstr[2]);
+            Multiprocessing();
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();

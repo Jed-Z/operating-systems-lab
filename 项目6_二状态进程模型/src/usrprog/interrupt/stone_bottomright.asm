@@ -1,9 +1,9 @@
 ; 原作：凌应标 2014-03
 ; 改写：张怡昕（17341203） 2019-03
 ; 说明：本程序是jed_stone.asm的改版。本程序在显示器左上角进行字符反弹。
-; 参数：(39, -1, 80, 13, 40, 7)
+; 参数：(39, 11, 80, 25, 40, 19)
 %include "../macro.asm"
-org addr_usrprog1 & 0FFFFh
+org addr_usrprog4 & 0FFFFh
 
     Dn_Rt equ 1            ; D-Down,U-Up,R-right,L-Left
     Up_Rt equ 2
@@ -12,12 +12,12 @@ org addr_usrprog1 & 0FFFFh
     delay equ 50000        ; 计时器延迟计数,用于控制画框的速度
     ddelay equ 580         ; 计时器延迟计数,用于控制画框的速度
 
-    screen_left equ -1     ; 字符运动左边界
-    screen_top equ -1      ; 字符运动上边界
-    screen_right equ 40    ; 字符运动右边界
-    screen_bottom equ 13   ; 字符运动下边界
-    originpos_y equ 0      ; 起点列数
-    originpos_x equ 7      ; 起点行数
+    screen_left equ 39     ; 字符运动左边界
+    screen_top equ 11      ; 字符运动上边界
+    screen_right equ 80    ; 字符运动右边界
+    screen_bottom equ 25   ; 字符运动下边界
+    originpos_y equ 40     ; 起点列数
+    originpos_x equ 19     ; 起点行数
 
 start:
     pusha
@@ -179,7 +179,7 @@ show:
 skip:
     mov al,byte[char]      ; AL = 显示字符值（默认值为20h=空格符）
     mov word[gs:bp],ax     ; 显示字符的ASCII码值
-    
+
     mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
     int 16h
     jz continue            ; 无键盘按下，继续
@@ -191,13 +191,11 @@ skip:
 continue:
     jmp loop1
 
+end:
+    jmp $                  ; 停止画框，无限循环
+
 QuitUsrProg:
     MOVE_INT_VECTOR 39h, 09h
-    mov si, [es:4*39h]     ; 以下4条指令恢复原来的BIOS 09h号
-    mov [es:4*09h], si
-    mov si, [es:4*39h+2]
-    mov [es:4*09h+2], si
-
     pop ds
     popa
     retf
@@ -221,7 +219,7 @@ DataArea:
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    hint1 db 'This is user program 1. Press ESC to exit.'
+    hint1 db 'This is user program 4. Press ESC to exit.'
     hint1len equ ($-hint1)
 
 %include "interrupt/intouch.asm"
