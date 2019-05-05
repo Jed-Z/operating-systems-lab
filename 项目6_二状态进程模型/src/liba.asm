@@ -36,7 +36,6 @@ clearScreen:               ; 函数：清屏
     pop ax
     retf
 
-
 printInPos:                ; 函数：在指定位置显示字符串
     pusha                  ; 保护现场（压栈16字节）
     mov si, sp             ; 由于代码中要用到bp，因此使用si来为参数寻址
@@ -83,22 +82,18 @@ getch:                     ; 函数：读取一个字符到tempc（无回显）
     mov ah, 0              ; 为返回值做准备
     retf
 
-
 powerOff:                  ; 函数：强制关机
     mov ax, 2001H
     mov dx, 1004H
     out dx, ax
 
-
 reBoot:
     int 19h
-
 
 getUsrProgNum:
     mov al, [addr_upinfo]
     mov ah, 0
     retf
-
 
 getUsrProgName:
     push bp
@@ -115,7 +110,6 @@ getUsrProgName:
     pop bx
     pop bp
     retf
-
 
 getUsrProgSize:
     push bp
@@ -134,7 +128,6 @@ getUsrProgSize:
     pop bx
     pop bp
     retf
-
 
 getUsrProgCylinder:
     push bp
@@ -155,7 +148,6 @@ getUsrProgCylinder:
     pop bp
     retf
 
-
 getUsrProgHead:
     push bp
     push bx
@@ -175,7 +167,6 @@ getUsrProgHead:
     pop bp
     retf
 
-
 getUsrProgSector:
     push bp
     push bx
@@ -194,7 +185,6 @@ getUsrProgSector:
     pop bx
     pop bp
     retf
-
 
 getUsrProgAddrSeg:
     push bp
@@ -256,7 +246,6 @@ getDateYear:               ; 函数：从CMOS获取当前年份
     mov ah, 0
     retf
 
-
 getDateMonth:              ; 函数：从CMOS获取当前月份
     mov al, 8
     out 70h, al
@@ -277,7 +266,6 @@ getDateHour:               ; 函数：从CMOS获取当前小时
     in al, 71h
     mov ah, 0
     retf
-
 
 getDateMinute:             ; 函数：从CMOS获取当前分钟
     mov al, 2
@@ -356,10 +344,14 @@ Timer:
     cli
     cmp word[cs:timer_flag], 0
     je QuitTimer
-
+pusha
+    mov al, '@'           ; al=要打印的字符
+    mov bh, 0              ; bh=页码
+    mov ah, 0Eh            ; 功能号：打印一个字符
+    int 10h                ; 打印字符
+popa
     ; mov word[cs:temp_sp], sp
     ; add word[cs:temp_sp], 6
-
     pop word[cs:temppcb_ip]
     pop word[cs:temppcb_cs]
     pop word[cs:temppcb_flags]
@@ -380,7 +372,7 @@ Timer:
     push 0
     push dx
     push 0
-    push sp                ; push的应该是FF22，但显示的是FF34，差了12
+    push sp
     push 0
     push bp
     push 0
@@ -398,7 +390,12 @@ Timer:
 
     call dword pcbSave
     add sp, 4*16           ; 丢弃参数
-
+pusha
+    mov al, '*'           ; al=要打印的字符
+    mov bh, 0              ; bh=页码
+    mov ah, 0Eh            ; 功能号：打印一个字符
+    int 10h                ; 打印字符
+popa
     call dword schedule    ; 进程调度
 
     mov ss, [cs:temppcb_ss]
@@ -421,6 +418,7 @@ Timer:
     push word[cs:temppcb_ip]
 
 QuitTimer:
+
     push ax
     mov al, 20h
     out 20h, al
@@ -429,40 +427,46 @@ QuitTimer:
     sti
     iret
 
-    global temppcb_ss
-    global temppcb_gs
-    global temppcb_fs
-    global temppcb_es
-    global temppcb_ds
-    global temppcb_di
-    global temppcb_si
-    global temppcb_bp
-    global temppcb_sp
-    global temppcb_bx
-    global temppcb_dx
-    global temppcb_cx
-    global temppcb_ax
-    global temppcb_ip
-    global temppcb_cs
-    global temppcb_flags
 
-    temppcb_ss dw 1000h
-    temppcb_gs dw 0B800h
-    temppcb_fs dw 1000h
-    temppcb_es dw 1000h
-    temppcb_ds dw 1000h
-    temppcb_di dw 0
-    temppcb_si dw 0
-    temppcb_bp dw 0
-    temppcb_sp dw 8888h
-    temppcb_bx dw 0
-    temppcb_dx dw 0
-    temppcb_cx dw 0
-    temppcb_ax dw 0
-    temppcb_ip dw 100h
-    temppcb_cs dw 0
-    temppcb_flags dw 512
+global temppcb_ss
+global temppcb_gs
+global temppcb_fs
+global temppcb_es
+global temppcb_ds
+global temppcb_di
+global temppcb_si
+global temppcb_bp
+global temppcb_sp
+global temppcb_bx
+global temppcb_dx
+global temppcb_cx
+global temppcb_ax
+global temppcb_ip
+global temppcb_cs
+global temppcb_flags
+
+temppcb_ss dw 1000h
+temppcb_gs dw 0B800h
+temppcb_fs dw 1000h
+temppcb_es dw 1000h
+temppcb_ds dw 1000h
+temppcb_di dw 0
+temppcb_si dw 0
+temppcb_bp dw 0
+temppcb_sp dw 0FE00h
+temppcb_bx dw 0
+temppcb_dx dw 0
+temppcb_cx dw 0
+temppcb_ax dw 0
+temppcb_ip dw 0
+temppcb_cs dw 1000h
+temppcb_flags dw 512
 
 global debug_int48h
 debug_int48h:
     int 48h
+    retf
+
+
+global debug_tempvar
+debug_tempvar dw 0x1234

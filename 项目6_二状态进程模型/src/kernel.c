@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-03
+ * @LastEditTime: 2019-05-05
  */
 #include "pcb.h"
 #include "stringio.h"
@@ -151,6 +151,8 @@ void Multiprocessing() {
     debug_init();
 
     timer_flag = 1;
+    Delay();
+    timer_flag = 0;
 }
 
 /* 操作系统shell */

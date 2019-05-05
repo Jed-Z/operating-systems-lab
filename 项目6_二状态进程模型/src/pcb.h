@@ -17,6 +17,7 @@ extern uint16_t temppcb_cs;
 extern uint16_t temppcb_flags;
 
 int timer_flag = 0;
+extern void powerOff();
 
 typedef struct RegisterImage{
 	int ss;     // 0
@@ -42,7 +43,7 @@ typedef struct PCB{
 	int state;
 } PCB;
 
-PCB pcb_table[3];
+PCB pcb_table[2];
 int current_process_id = 0;
 
 
@@ -71,32 +72,15 @@ void debug_init() {
 	pcb_table[1].regimg.ds = 0x1000;
 	pcb_table[1].regimg.es = 0x1000;
 	pcb_table[1].regimg.fs = 0x1000;
-	pcb_table[1].regimg.gs = 0x1000;
+	pcb_table[1].regimg.gs = 0xB800;
 	pcb_table[1].regimg.ss = 0x1000;
-	pcb_table[1].regimg.ip = 0x100;
+	pcb_table[1].regimg.ip = 0;
 	pcb_table[1].regimg.cs = 0x1000;
 	pcb_table[1].regimg.flags = 512;
 	pcb_table[1].regimg.di = 0;
 	pcb_table[1].regimg.si = 0;
-	pcb_table[1].regimg.sp = 0x100-4;
+	pcb_table[1].regimg.sp = 0xFE00;
 	pcb_table[1].regimg.bp = 0;
-
-	pcb_table[2].regimg.ax = 0xaaaa;
-	pcb_table[2].regimg.bx = 0;
-	pcb_table[2].regimg.cx = 0;
-	pcb_table[2].regimg.dx = 0;
-	pcb_table[2].regimg.ds = 0x2000;
-	pcb_table[2].regimg.es = 0x2000;
-	pcb_table[2].regimg.fs = 0x2000;
-	pcb_table[2].regimg.gs = 0x2000;
-	pcb_table[2].regimg.ss = 0x2000;
-	pcb_table[2].regimg.ip = 0x100;
-	pcb_table[2].regimg.cs = 0x2000;
-	pcb_table[2].regimg.flags = 512;
-	pcb_table[2].regimg.di = 0;
-	pcb_table[2].regimg.si = 0;
-	pcb_table[2].regimg.sp = 0x100-4;
-	pcb_table[2].regimg.bp = 0;
 }
 
 void pcbSave(int gs,int fs,int es,int ds,int di,int si,int bp, int sp,
@@ -120,7 +104,7 @@ void pcbSave(int gs,int fs,int es,int ds,int di,int si,int bp, int sp,
 }
 
 void schedule() {
-	current_process_id = 0;
+	current_process_id = 1;
 	temppcb_ss =  pcb_table[current_process_id].regimg.ss;
 	temppcb_gs =  pcb_table[current_process_id].regimg.gs;
 	temppcb_fs =  pcb_table[current_process_id].regimg.fs;
@@ -143,4 +127,16 @@ void debug_showreg(uint16_t reg) {
 	print(itoa(reg, 16));
 	char* end = "###reg end###\r\n\r\n";
 	print(end);
+}
+
+void Delay()
+{
+	int i = 0;
+	int j = 0;
+	for( i=0;i<15000;i++ )
+		for( j=0;j<15000;j++ )
+		{
+			j++;
+			j--;
+		}
 }
