@@ -2,9 +2,9 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-05
+ * @LastEditTime: 2019-05-06
  */
-#include "pcb.h"
+#include <stdint.h>
 #include "stringio.h"
 #define BUFLEN 16
 #define OS_VERSION "1.4"
@@ -30,7 +30,20 @@ extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
 extern void loadProcessMem();
 
+extern uint16_t timer_flag;
+
 extern void debug_int48h();
+void Delay()
+{
+	int i = 0;
+	int j = 0;
+	for( i=0;i<30000;i++ )
+		for( j=0;j<30000;j++ )
+		{
+			j++;
+			j--;
+		}
+}
 
 /* 系统启动界面 */
 void startUp() {
@@ -147,8 +160,6 @@ void Multiprocessing() {
     loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
     progid_to_run = 2;
     loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
-
-    debug_init();
 
     timer_flag = 1;
     Delay();

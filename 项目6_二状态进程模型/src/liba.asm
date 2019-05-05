@@ -315,110 +315,60 @@ loadProcessMem:
 
 
 global Timer
-extern timer_flag
-extern pcbSave
-extern getCurrentRegImg
-extern schedule
-extern debug_showreg
-
-extern getRegImg_ss
-extern getRegImg_gs
-extern getRegImg_fs
-extern getRegImg_es
-extern getRegImg_ds
-extern getRegImg_di
-extern getRegImg_si
-extern getRegImg_bp
-extern getRegImg_sp
-extern getRegImg_bx
-extern getRegImg_dx
-extern getRegImg_cx
-extern getRegImg_ax
-extern getRegImg_ip
-extern getRegImg_cs
-extern getRegImg_flags
-
-extern getCurrentProcessId
+global timer_flag
 
 Timer:
     cli
     cmp word[cs:timer_flag], 0
     je QuitTimer
-pusha
-    mov al, '@'           ; al=要打印的字符
-    mov bh, 0              ; bh=页码
-    mov ah, 0Eh            ; 功能号：打印一个字符
-    int 10h                ; 打印字符
-popa
-    ; mov word[cs:temp_sp], sp
-    ; add word[cs:temp_sp], 6
-    pop word[cs:temppcb_ip]
-    pop word[cs:temppcb_cs]
-    pop word[cs:temppcb_flags]
-    push 0
-    push word[cs:temppcb_flags]
-    push 0
-    push word[cs:temppcb_cs]
-    push 0
-    push word[cs:temppcb_ip]
-    push 0
+
     push ss
-    push 0
-    push ax
-    push 0
-    push bx
-    push 0
-    push cx
-    push 0
-    push dx
-    push 0
-    push sp
-    push 0
-    push bp
-    push 0
-    push si
-    push 0
-    push di
-    push 0
-    push ds
-    push 0
-    push es
-    push 0
-    push fs
-    push 0
     push gs
+    push fs
+    push es
+    push ds
+    push di
+    push si
+    push bp
+    push sp
+    push bx
+    push dx
+    push cx
+    push ax
+    call pcbSave
+    add sp, 16+2           ; 丢弃参数
 
-    call dword pcbSave
-    add sp, 4*16           ; 丢弃参数
-pusha
-    mov al, '*'           ; al=要打印的字符
-    mov bh, 0              ; bh=页码
-    mov ah, 0Eh            ; 功能号：打印一个字符
-    int 10h                ; 打印字符
-popa
-    call dword schedule    ; 进程调度
+    mov word[cs:current_process_id], 1
 
-    mov ss, [cs:temppcb_ss]
-    mov gs, [cs:temppcb_gs]
-    mov fs, [cs:temppcb_fs]
-    mov es, [cs:temppcb_es]
-    mov ds, [cs:temppcb_ds]
-    mov di, [cs:temppcb_di]
-    mov si, [cs:temppcb_si]
-    mov bp, [cs:temppcb_bp]
-    mov sp, [cs:temppcb_sp]
-    mov bx, [cs:temppcb_bx]
-    mov dx, [cs:temppcb_dx]
-    mov cx, [cs:temppcb_cx]
-    mov ax, [cs:temppcb_ax]
-    add sp, 4*8+2
+pcbRestart:                ; 不是函数
+    mov si, pcb_table
+    mov si, pcb_table
+    mov ax, 34
+    mul word[cs:current_process_id]
+    add si, ax
 
-    push word[cs:temppcb_flags]
-    push word[cs:temppcb_cs]
-    push word[cs:temppcb_ip]
+    mov ax, [cs:si+0]
+    mov cx, [cs:si+2]
+    mov dx, [cs:si+4]
+    mov bx, [cs:si+6]
+    mov sp, [cs:si+8]
+    mov bp, [cs:si+10]
+    mov di, [cs:si+14]
+    mov ds, [cs:si+16]
+    mov es, [cs:si+18]
+    mov fs, [cs:si+20]
+    mov gs, [cs:si+22]
+    mov ss, [cs:si+24]
+    add sp, 11*2
+
+    push word[cs:si+30]    ; flags
+    push word[cs:si+28]    ; cs
+    push word[cs:si+26]    ; ip
+
+    push word[cs:si+12]    ; si
+    pop si
 
 QuitTimer:
-
     push ax
     mov al, 20h
     out 20h, al
@@ -427,46 +377,85 @@ QuitTimer:
     sti
     iret
 
+    timer_flag dw 0
+    current_process_id dw 0
 
-global temppcb_ss
-global temppcb_gs
-global temppcb_fs
-global temppcb_es
-global temppcb_ds
-global temppcb_di
-global temppcb_si
-global temppcb_bp
-global temppcb_sp
-global temppcb_bx
-global temppcb_dx
-global temppcb_cx
-global temppcb_ax
-global temppcb_ip
-global temppcb_cs
-global temppcb_flags
+%macro ProcessControlBlock 1
+    dw 0                   ; ax +0
+    dw 0                   ; cx +2
+    dw 0                   ; dx +4
+    dw 0                   ; bx +6
+    dw 0FE00h              ; sp +8
+    dw 0                   ; bp +10
+    dw 0                   ; si +12
+    dw 0                   ; di +14
+    dw %1                  ; ds +16
+    dw %1                  ; es +18
+    dw %1                  ; fs +20
+    dw 0B800h              ; gs +22
+    dw %1                  ; ss +24
+    dw 0                   ; ip +26
+    dw %1                  ; cs +28
+    dw 512                 ; flags +30
+    db 0                   ; id
+    db 0                   ; state
+%endmacro                  ; 共33个字节
 
-temppcb_ss dw 1000h
-temppcb_gs dw 0B800h
-temppcb_fs dw 1000h
-temppcb_es dw 1000h
-temppcb_ds dw 1000h
-temppcb_di dw 0
-temppcb_si dw 0
-temppcb_bp dw 0
-temppcb_sp dw 0FE00h
-temppcb_bx dw 0
-temppcb_dx dw 0
-temppcb_cx dw 0
-temppcb_ax dw 0
-temppcb_ip dw 0
-temppcb_cs dw 1000h
-temppcb_flags dw 512
+pcb_table:
+pcb_0: ProcessControlBlock 0
+pcb_1: ProcessControlBlock 1000h
+
+pcbSave:
+    pusha
+    mov bp, sp
+    add bp, 16+2
+    mov di, pcb_table
+
+    mov ax, 34
+    mul word[cs:current_process_id]
+    add di, ax
+
+    mov ax, [bp]
+    mov [cs:di], ax
+    mov ax, [bp+2]
+    mov [cs:di+2], ax
+    mov ax, [bp+4]
+    mov [cs:di+4], ax
+    mov ax, [bp+6]
+    mov [cs:di+6], ax
+    mov ax, [bp+8]
+    mov [cs:di+8], ax
+    mov ax, [bp+10]
+    mov [cs:di+10], ax
+    mov ax, [bp+12]
+    mov [cs:di+12], ax
+    mov ax, [bp+14]
+    mov [cs:di+14], ax
+    mov ax, [bp+16]
+    mov [cs:di+16], ax
+    mov ax, [bp+18]
+    mov [cs:di+18], ax
+    mov ax, [bp+20]
+    mov [cs:di+20], ax
+    mov ax, [bp+22]
+    mov [cs:di+22], ax
+    mov ax, [bp+24]
+    mov [cs:di+24], ax
+    mov ax, [bp+26]
+    mov [cs:di+26], ax
+    mov ax, [bp+28]
+    mov [cs:di+28], ax
+    mov ax, [bp+30]
+    mov [cs:di+30], ax
+
+    popa
+    ret
+
+
+
+
 
 global debug_int48h
 debug_int48h:
-    int 48h
-    retf
-
-
-global debug_tempvar
-debug_tempvar dw 0x1234
+int 48h
+retf
