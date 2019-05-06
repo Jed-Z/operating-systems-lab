@@ -28,7 +28,7 @@ extern uint8_t getDateHour();
 extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
-extern void loadProcessMem();
+extern void loadProcessMem(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t seg, uint16_t offset, int progid_to_run);
 
 extern uint16_t timer_flag;
 
@@ -174,7 +174,7 @@ void multiProcessing(char* cmdstr) {
         for(int i = 0; progids[i] != '\0'; i++) {
             if(isnum(progids[i])) {  // 是数字（不是空格）
                 int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
-                loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
+                loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run), progid_to_run);
             }
         }
         const char* hint = "All programmes have been executed successfully as you wish.\r\n";

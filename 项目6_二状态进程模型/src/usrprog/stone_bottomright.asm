@@ -35,7 +35,7 @@ start:
     mov gs,ax              ; GS = B800h，指向文本模式的显示缓冲区
     mov byte[char],'X'
 
-    PRINT_IN_POS hint1, hint1len, 16, 30
+    ; PRINT_IN_POS hint1, hint1len, 16, 30
 
 initialize:                ; 多次调用用户程序时，可保证初始值是相同的
     mov word[x], originpos_x
@@ -218,7 +218,7 @@ DataArea:
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    hint1 db 'This is user program 4. Press ESC to exit.'
-    hint1len equ ($-hint1)
+    ; hint1 db 'This is user program 4. Press ESC to exit.'
+    ; hint1len equ ($-hint1)
 
 ; %include "interrupt/intouch.asm"

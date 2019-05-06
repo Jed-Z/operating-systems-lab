@@ -310,7 +310,11 @@ loadProcessMem:
     add bp, 16+4              ; 参数地址
     LOAD_TO_MEM [bp+12], [bp], [bp+4], [bp+8], [bp+16], [bp+20]
 
-    
+    mov si, pcb_table
+    mov ax, 34
+    mul word[bp+24]           ; progid_to_run
+    add si, ax                ; si指向新进程的PCB
+    mov byte[cs:si+33], 1     ; 设其状态为就绪态
     popa
     retf
 
@@ -381,7 +385,7 @@ QuitTimer:
     timer_flag dw 0
     current_process_id dw 0
 
-%macro ProcessControlBlock 2
+%macro ProcessControlBlock 1
     dw 0                      ; ax，偏移量=+0
     dw 0                      ; cx，偏移量=+2
     dw 0                      ; dx，偏移量=+4
@@ -399,18 +403,18 @@ QuitTimer:
     dw %1                     ; cs，偏移量=+28
     dw 512                    ; flags，偏移量=+30
     db 0                      ; id，进程ID，偏移量=+32
-    db %2                      ; state，{0:新建态; 1:就绪态; 2:运行态}，偏移量=+33
+    db 0                      ; state，{0:新建态; 1:就绪态; 2:运行态}，偏移量=+33
 %endmacro
 
 pcb_table:
-pcb_0: ProcessControlBlock 0, 0
-pcb_1: ProcessControlBlock 1000h, 1
-pcb_2: ProcessControlBlock 2000h, 1
-pcb_3: ProcessControlBlock 0, 0
-pcb_4: ProcessControlBlock 0, 0
-pcb_5: ProcessControlBlock 0, 0
-pcb_6: ProcessControlBlock 0, 0
-pcb_7: ProcessControlBlock 0, 0
+pcb_0: ProcessControlBlock 0
+pcb_1: ProcessControlBlock 1000h
+pcb_2: ProcessControlBlock 2000h
+pcb_3: ProcessControlBlock 3000h
+pcb_4: ProcessControlBlock 4000h
+pcb_5: ProcessControlBlock 0
+pcb_6: ProcessControlBlock 0
+pcb_7: ProcessControlBlock 0
 
 pcbSave:
     pusha
@@ -460,29 +464,24 @@ pcbSave:
 
 pcbSchedule:
     pusha
-    inc word[cs:current_process_id]
-    cmp word[cs:current_process_id], 3
-    jnz byebye
-    mov word[cs:current_process_id], 1
-    byebye:
-    ; mov si, pcb_table
-    ; mov ax, 34
-    ; mul word[cs:current_process_id]
-    ; add si, ax                ; si指向当前PCB的首地址
-    ; mov word[cs:si+33], 1     ; 设置state为就绪态
-    ; try_next_pcb:
-    ;     inc word[cs:current_process_id]
-    ;     add si, 34            ; si指向下一PCB的首地址
-    ;     cmp word[cs:current_process_id], 7
-    ;     jna pcb_not_exceed    ; 若id递增到8，则将其恢复为1
-    ;     mov word[cs:current_process_id], 1
-    ;     ret
-    ;     mov si, pcb_table
-    ;     add si, 34
-    ;     pcb_not_exceed:
-    ;     cmp word[cs:si+33], 1 ; 如果下一进程处于就绪态
-    ;     jne try_next_pcb      ; 调度完毕
-    ; mov word[cs:si+33], 2     ; 设置为运行态
+    mov si, pcb_table
+    mov ax, 34
+    mul word[cs:current_process_id]
+    add si, ax                ; si指向当前PCB的首地址
+    mov byte[cs:si+33], 1     ; 将当前进程设置为就绪态
+
+    try_next_pcb:             ; 循环地寻找下一个处于就绪态的进程
+        inc word[cs:current_process_id]
+        add si, 34            ; si指向下一PCB的首地址
+        cmp word[cs:current_process_id], 7
+        jna pcb_not_exceed    ; 若id递增到8，则将其恢复为1
+        mov word[cs:current_process_id], 1
+        mov si, pcb_table+34  ; si指向1号进程的PCB的首地址
+
+    pcb_not_exceed:
+        cmp byte[cs:si+33], 1 ; 判断下一进程是否处于就绪态
+        jne try_next_pcb      ; 不是就绪态，则尝试下一个进程
+        mov byte[cs:si+33], 2 ; 是就绪态，则设置为运行态。调度完毕
     popa
     ret
 
