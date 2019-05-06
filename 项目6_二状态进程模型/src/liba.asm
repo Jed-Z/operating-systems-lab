@@ -20,6 +20,7 @@ BITS 16
 [global getUsrProgAddrSeg]
 [global getUsrProgAddrOff]
 [global loadAndRun]
+[global loadProcessMem]
 [global getDateYear]
 [global getDateMonth]
 [global getDateDay]
@@ -303,12 +304,13 @@ syscaller:
         dw sys_showOuch, sys_toUpper, sys_toLower
         dw sys_atoi, sys_itoa, sys_printInPos
 
-global loadProcessMem
 loadProcessMem:
     pusha
     mov bp, sp
     add bp, 16+4              ; 参数地址
     LOAD_TO_MEM [bp+12], [bp], [bp+4], [bp+8], [bp+16], [bp+20]
+
+    
     popa
     retf
 

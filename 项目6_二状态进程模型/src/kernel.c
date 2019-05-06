@@ -155,15 +155,42 @@ void batch(char* cmdstr) {
         NEWLINE;
     }
 }
-void Multiprocessing() {
-    int progid_to_run = 1;
-    loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
-    progid_to_run = 2;
-    loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
+void multiProcessing(char* cmdstr) {
+    char progids[BUFLEN+1];
+    getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
+    uint8_t isvalid = 1;  // 参数有效标志位
+    for(int i = 0; progids[i]; i++) {  // 判断参数是有效的
+        if(!isnum(progids[i]) && progids[i]!=' ') {  // 既不是数字又不是空格，无效参数
+            isvalid = 0;
+            break;
+        }
+        if(isnum(progids[i]) && progids[i]-'0'>getUsrProgNum()) {
+            isvalid = 0;
+            break;
+        }
+    }
+    if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
+        int i = 0;
+        for(int i = 0; progids[i] != '\0'; i++) {
+            if(isnum(progids[i])) {  // 是数字（不是空格）
+                int progid_to_run = progids[i] - '0';  // 要运行的用户程序ProgID
+                loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run));
+            }
+        }
+        const char* hint = "All programmes have been executed successfully as you wish.\r\n";
+        print(hint);
+    }
+    else {  // 参数无效，报错，不执行任何用户程序
+        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to ";
+        print(error_msg);
+        print(itoa(getUsrProgNum(), 10));
+        putchar('.');
+        NEWLINE;
+    }
 
-    timer_flag = 1;
-    Delay();
-    timer_flag = 0;
+    timer_flag = 1;  // 允许时钟中断处理多进程
+    Delay();  // 提升稳定性
+    timer_flag = 0;  // 禁止时钟中断处理多进程
 }
 
 /* 操作系统shell */
@@ -193,7 +220,7 @@ void shell() {
             batch(cmdstr);
         }
         else if(strcmp(cmd_firstword, commands[run]) == 0) {  // bat：批处理
-            Multiprocessing();
+            multiProcessing(cmdstr);
         }
         else if(strcmp(cmd_firstword, commands[poweroff]) == 0) {
             powerOff();

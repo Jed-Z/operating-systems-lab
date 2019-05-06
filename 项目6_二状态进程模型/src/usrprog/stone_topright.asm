@@ -24,8 +24,8 @@ start:
     push ds
     mov ax, 0
     mov es, ax
-    MOVE_INT_VECTOR 09h, 39h
-    WRITE_INT_VECTOR 09h, IntOuch
+    ; MOVE_INT_VECTOR 09h, 39h
+    ; WRITE_INT_VECTOR 09h, IntOuch
     call ClearScreen       ; 清屏
     mov ax,cs
     mov es,ax              ; ES = CS
@@ -67,7 +67,6 @@ loop1:
     mov al,4
     cmp al,byte[rdul]
     jz  DnLt
-    ; jmp $
 
 DnRt:
     inc word[x]
@@ -192,11 +191,7 @@ continue:
     jmp loop1
 
 QuitUsrProg:
-    MOVE_INT_VECTOR 39h, 09h
-    mov si, [es:4*39h]     ; 以下4条指令恢复原来的BIOS 09h号
-    mov [es:4*09h], si
-    mov si, [es:4*39h+2]
-    mov [es:4*09h+2], si
+    ; MOVE_INT_VECTOR 39h, 09h
 
     pop ds
     popa
@@ -224,4 +219,4 @@ DataArea:
     ; hint1 db 'This is user program 2. Press ESC to exit.'
     ; hint1len equ ($-hint1)
 
-%include "interrupt/intouch.asm"
+; %include "interrupt/intouch.asm"

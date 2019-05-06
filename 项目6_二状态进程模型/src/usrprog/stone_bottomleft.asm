@@ -24,8 +24,8 @@ start:
     push ds
     mov ax, 0
     mov es, ax
-    MOVE_INT_VECTOR 09h, 39h
-    WRITE_INT_VECTOR 09h, IntOuch
+    ; MOVE_INT_VECTOR 09h, 39h
+    ; WRITE_INT_VECTOR 09h, IntOuch
     call ClearScreen       ; 清屏
     mov ax,cs
     mov es,ax              ; ES = CS
@@ -67,7 +67,6 @@ loop1:
     mov al,4
     cmp al,byte[rdul]
     jz  DnLt
-    ; jmp $
 
 DnRt:
     inc word[x]
@@ -195,7 +194,7 @@ end:
     jmp $                  ; 停止画框，无限循环
 
 QuitUsrProg:
-    MOVE_INT_VECTOR 39h, 09h
+    ; MOVE_INT_VECTOR 39h, 09h
     pop ds
     popa
     retf
@@ -222,4 +221,4 @@ DataArea:
     hint1 db 'This is user program 3. Press ESC to exit.'
     hint1len equ ($-hint1)
 
- %include "interrupt/intouch.asm"
+;  %include "interrupt/intouch.asm"
