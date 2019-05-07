@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-06
+ * @LastEditTime: 2019-05-07
  */
 #include <stdint.h>
 #include "stringio.h"
@@ -32,7 +32,6 @@ extern void loadProcessMem(uint8_t cylinder, uint8_t head, uint8_t sector, uint1
 
 extern uint16_t timer_flag;
 
-extern void debug_int48h();
 void Delay()
 {
 	int i = 0;
@@ -155,6 +154,7 @@ void batch(char* cmdstr) {
         NEWLINE;
     }
 }
+
 void multiProcessing(char* cmdstr) {
     char progids[BUFLEN+1];
     getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
@@ -164,7 +164,7 @@ void multiProcessing(char* cmdstr) {
             isvalid = 0;
             break;
         }
-        if(isnum(progids[i]) && progids[i]-'0'>getUsrProgNum()) {
+        if(isnum(progids[i]) && progids[i]-'0'>4) {  // 只能运行前4个用户程序
             isvalid = 0;
             break;
         }
@@ -177,20 +177,18 @@ void multiProcessing(char* cmdstr) {
                 loadProcessMem(getUsrProgCylinder(progid_to_run), getUsrProgHead(progid_to_run), getUsrProgSector(progid_to_run), getUsrProgSize(progid_to_run)/512, getUsrProgAddrSeg(progid_to_run), getUsrProgAddrOff(progid_to_run), progid_to_run);
             }
         }
+        timer_flag = 1;  // 允许时钟中断处理多进程
+        Delay();
+        timer_flag = 0;  // 禁止时钟中断处理多进程
         const char* hint = "All programmes have been executed successfully as you wish.\r\n";
         print(hint);
     }
     else {  // 参数无效，报错，不执行任何用户程序
-        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to ";
+        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to 4.";
         print(error_msg);
-        print(itoa(getUsrProgNum(), 10));
         putchar('.');
         NEWLINE;
     }
-
-    timer_flag = 1;  // 允许时钟中断处理多进程
-    Delay();  // 提升稳定性
-    timer_flag = 0;  // 禁止时钟中断处理多进程
 }
 
 /* 操作系统shell */

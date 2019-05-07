@@ -16,8 +16,8 @@ org addr_usrprog2 & 0FFFFh
     screen_top equ -1      ; 字符运动上边界
     screen_right equ 80    ; 字符运动右边界
     screen_bottom equ 13   ; 字符运动下边界
-    originpos_y equ 40     ; 起点列数
-    originpos_x equ 7      ; 起点行数
+    originpos_y equ 45     ; 起点列数
+    originpos_x equ 0      ; 起点行数
 
 start:
     pusha
@@ -179,13 +179,13 @@ skip:
     mov al,byte[char]      ; AL = 显示字符值（默认值为20h=空格符）
     mov word[gs:bp],ax     ; 显示字符的ASCII码值
 
-    ; mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
-    ; int 16h
-    ; jz continue            ; 无键盘按下，继续
-    ; mov ah, 0              ; 功能号：查询键盘输入
-    ; int 16h
-    ; cmp al, 27             ; 是否按下ESC
-    ; je QuitUsrProg         ; 若按下ESC，退出用户程序
+                           ; mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
+                           ; int 16h
+                           ; jz continue            ; 无键盘按下，继续
+                           ; mov ah, 0              ; 功能号：查询键盘输入
+                           ; int 16h
+                           ; cmp al, 27             ; 是否按下ESC
+                           ; je QuitUsrProg         ; 若按下ESC，退出用户程序
 
 continue:
     jmp loop1
@@ -216,7 +216,7 @@ DataArea:
     curcolor db 80h        ; 保存当前字符颜色属性，用于myinfo
     curcolor2 db 01h       ; 保存当前字符颜色属性，用于移动的字符
 
-    ; hint1 db 'This is user program 2. Press ESC to exit.'
-    ; hint1len equ ($-hint1)
+                           ; hint1 db 'This is user program 2. Press ESC to exit.'
+                           ; hint1len equ ($-hint1)
 
-; %include "interrupt/intouch.asm"
+                           ; %include "interrupt/intouch.asm"

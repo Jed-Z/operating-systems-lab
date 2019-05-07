@@ -16,7 +16,7 @@ org addr_usrprog3 & 0FFFFh
     screen_top equ 11      ; 字符运动上边界
     screen_right equ 40    ; 字符运动右边界
     screen_bottom equ 25   ; 字符运动下边界
-    originpos_y equ 0      ; 起点列数
+    originpos_y equ 35      ; 起点列数
     originpos_x equ 19     ; 起点行数
 
 start:
@@ -179,13 +179,13 @@ skip:
     mov al,byte[char]      ; AL = 显示字符值（默认值为20h=空格符）
     mov word[gs:bp],ax     ; 显示字符的ASCII码值
 
-    mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
-    int 16h
-    jz continue            ; 无键盘按下，继续
-    mov ah, 0              ; 功能号：查询键盘输入
-    int 16h
-    cmp al, 27             ; 是否按下ESC
-    je QuitUsrProg         ; 若按下ESC，退出用户程序
+    ; mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
+    ; int 16h
+    ; jz continue            ; 无键盘按下，继续
+    ; mov ah, 0              ; 功能号：查询键盘输入
+    ; int 16h
+    ; cmp al, 27             ; 是否按下ESC
+    ; je QuitUsrProg         ; 若按下ESC，退出用户程序
 
 continue:
     jmp loop1

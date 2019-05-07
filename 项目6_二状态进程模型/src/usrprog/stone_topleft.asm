@@ -16,8 +16,8 @@ org addr_usrprog2 & 0FFFFh
     screen_top equ -1      ; 字符运动上边界
     screen_right equ 40    ; 字符运动右边界
     screen_bottom equ 13   ; 字符运动下边界
-    originpos_y equ 0      ; 起点列数
-    originpos_x equ 7      ; 起点行数
+    originpos_y equ 4      ; 起点列数
+    originpos_x equ 11      ; 起点行数
 
 start:
     pusha
