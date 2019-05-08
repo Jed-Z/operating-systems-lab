@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-07
+ * @LastEditTime: 2019-05-08
  */
 #include <stdint.h>
 #include "stringio.h"
@@ -36,8 +36,8 @@ void Delay()
 {
 	int i = 0;
 	int j = 0;
-	for( i=0;i<30000;i++ )
-		for( j=0;j<30000;j++ )
+	for( i=0;i<10000;i++ )
+		for( j=0;j<10000;j++ )
 		{
 			j++;
 			j--;
@@ -180,7 +180,8 @@ void multiProcessing(char* cmdstr) {
         timer_flag = 1;  // 允许时钟中断处理多进程
         Delay();
         timer_flag = 0;  // 禁止时钟中断处理多进程
-        const char* hint = "All programmes have been executed successfully as you wish.\r\n";
+        clearScreen();
+        const char* hint = "All processes have been killed.\r\n";
         print(hint);
     }
     else {  // 参数无效，报错，不执行任何用户程序
