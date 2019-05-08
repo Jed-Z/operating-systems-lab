@@ -71,7 +71,7 @@ QuitTimer:
     timer_flag dw 0
     current_process_id dw 0
 
-%macro ProcessControlBlock 1
+%macro ProcessControlBlock 1  ; 参数：段值
     dw 0                      ; ax，偏移量=+0
     dw 0                      ; cx，偏移量=+2
     dw 0                      ; dx，偏移量=+4

@@ -179,13 +179,17 @@ skip:
     mov al,byte[char]      ; AL = 显示字符值（默认值为20h=空格符）
     mov word[gs:bp],ax     ; 显示字符的ASCII码值
 
-                           ; mov ah, 01h            ; 功能号：查询键盘缓冲区但不等待
-                           ; int 16h
-                           ; jz continue            ; 无键盘按下，继续
-                           ; mov ah, 0              ; 功能号：查询键盘输入
-                           ; int 16h
-                           ; cmp al, 27             ; 是否按下ESC
-                           ; je QuitUsrProg         ; 若按下ESC，退出用户程序
+    mov ah, 06h             ; 功能号：获取timer_flag
+    int 21h                 ;ax=timer_flag
+    cmp ax, 0
+    jne continue            ; 如果已设置timer_flag，则不进行键盘判断
+    mov ah, 01h             ; 功能号：查询键盘缓冲区但不等待
+    int 16h
+    jz continue             ; 无键盘按下，继续
+    mov ah, 0               ; 功能号：查询键盘输入
+    int 16h
+    cmp al, 27              ; 是否按下ESC
+    je QuitUsrProg          ; 若按下ESC，退出用户程序
 
 continue:
     jmp loop1

@@ -186,7 +186,6 @@ void multiProcessing(char* cmdstr) {
     else {  // 参数无效，报错，不执行任何用户程序
         const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to 4.";
         print(error_msg);
-        putchar('.');
         NEWLINE;
     }
 }

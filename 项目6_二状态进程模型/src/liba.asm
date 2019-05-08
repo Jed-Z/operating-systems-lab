@@ -287,6 +287,7 @@ getDateSecond:                ; 函数：从CMOS获取当前秒钟
 [extern sys_atoi]
 [extern sys_itoa]
 [extern sys_printInPos]
+[extern sys_timer_flag]
 syscaller:
     push ds
     push si                   ; 用si作为内部临时寄存器
@@ -301,4 +302,4 @@ syscaller:
     iret                      ; int 21h中断返回
     sys_table:                ; 存放功能号与系统调用函数映射的表
         dw sys_showOuch, sys_toUpper, sys_toLower
-        dw sys_atoi, sys_itoa, sys_printInPos
+        dw sys_atoi, sys_itoa, sys_printInPos, sys_timer_flag

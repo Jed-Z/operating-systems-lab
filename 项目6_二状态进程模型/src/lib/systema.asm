@@ -5,6 +5,7 @@ BITS 16
 [global sys_atoi]
 [global sys_itoa]
 [global sys_printInPos]
+[global sys_timer_flag]
 
 sys_showOuch:
     pusha             ; 保护现场
@@ -101,4 +102,9 @@ sys_printInPos:
     int 10h
     add sp, 4         ; 丢弃参数
     popa
+    ret
+
+[extern timer_flag]
+sys_timer_flag:
+    mov ax, [cs:timer_flag]
     ret
