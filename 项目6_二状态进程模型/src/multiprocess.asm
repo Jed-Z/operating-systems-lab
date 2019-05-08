@@ -10,7 +10,6 @@ BITS 16
 [global loadProcessMem]
 
 Timer:                             ; 08h号时钟中断处理程序
-    cli                            ; 关中断，不允许时钟中断嵌套
     cmp word[cs:timer_flag], 0
     je QuitTimer
 
@@ -60,13 +59,11 @@ PcbRestart:                        ; 不是函数
     pop si                         ; 恢复si
 
 QuitTimer:
-    ; call resetAllPcbExceptZero
     push ax
     mov al, 20h
     out 20h, al
     out 0A0h, al
     pop ax
-    sti                            ; 开中断
     iret
 
     timer_flag dw 0
@@ -170,7 +167,6 @@ pcbSchedule:                       ; 函数：进程调度
     mov word[cs:timer_flag], 0     ; 禁止时钟中断处理多进程
     call resetAllPcbExceptZero
     jmp QuitSchedule
-
     try_next_pcb:                  ; 循环地寻找下一个处于就绪态的进程
         inc word[cs:current_process_id]
         add si, 34                 ; si指向下一PCB的首地址
