@@ -4,14 +4,11 @@
 ; @LastEditTime: 2019-04-19
 
 %include "../macro.asm"
-org addr_syscalltest & 0FFFFh
+org addr_syscalltest
 
 Start:
     pusha
-    push ds
     push es
-    mov ax, cs
-    mov ds, ax
 
     mov ax, 0003h
     int 10h                            ; 清屏
@@ -31,10 +28,10 @@ Start:
     je QuitUsrProg                     ; 直接退出
 
     PRINT_IN_POS hint1, hint_len, 2, 0
-    PRINT_IN_POS upper_lower, 14, 3, 0
     mov ax, cs
     mov es, ax                         ; es=cs
     mov dx, upper_lower                ; es:dx=串地址
+    PRINT_IN_POS upper_lower, 14, 3, 0
     mov ah, 01h                        ; 系统调用功能号ah=01h，大写转小写
     int 21h
     PRINT_IN_POS upper_lower, 14, 4, 0
@@ -102,7 +99,6 @@ Start:
     je QuitUsrProg                     ; 直接退出
 QuitUsrProg:
     pop es
-    pop ds
     popa
     retf
 
@@ -120,6 +116,6 @@ DataArea:
 
     upper_lower db 'AbCdEfGhIjKlMn', 0 ; 字符串以'\0'结尾
 
-    number_buf db '12345', 0, 0        ; 字符串以'\0'结尾
-    test_message1 db 'This is a test message,', 0
-    test_message2 db 'printed using `ah=05h` and `int 21h`.', 0
+    number_buf db '12345', 0           ; 字符串以'\0'结尾
+    test_message1 db 'This is a test message,'
+    test_message2 db 'printed using `ah=05h` and `int 21h`.'

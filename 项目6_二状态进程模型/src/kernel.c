@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-08
+ * @LastEditTime: 2019-05-09
  */
 #include <stdint.h>
 #include "stringio.h"
@@ -159,6 +159,7 @@ void multiProcessing(char* cmdstr) {
     char progids[BUFLEN+1];
     getAfterFirstWord(cmdstr, progids);  // 获取run后的参数列表
     uint8_t isvalid = 1;  // 参数有效标志位
+    if(progids[0] == '\0') { isvalid = 0; }
     for(int i = 0; progids[i]; i++) {  // 判断参数是有效的
         if(!isnum(progids[i]) && progids[i]!=' ') {  // 既不是数字又不是空格，无效参数
             isvalid = 0;

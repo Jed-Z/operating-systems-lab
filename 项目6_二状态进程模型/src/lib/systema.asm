@@ -30,77 +30,68 @@ sys_showOuch:
 
 [extern toupper]
 sys_toUpper:
-    push ax
-    mov ax, es
-    shl ax, 4
-    add ax, dx
-    push 0
-    push ax
+    push es           ; 传递参数
+    push dx           ; 传递参数
     call dword toupper
-    add sp, 4         ; 丢弃参数
-    pop ax
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
 [extern tolower]
 sys_toLower:
-    push ax
-    mov ax, es
-    shl ax, 4
-    add ax, dx
-    ; push 0
-    push ax
+    push es           ; 传递参数
+    push dx           ; 传递参数
     call dword tolower
-    add sp, 4         ; 丢弃参数
-    pop ax
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
 [extern atoi]
 sys_atoi:
-    push ax
-    mov ax, es
-    shl ax, 4
-    add ax, dx
-    push 0
-    push ax
+    push es           ; 传递参数
+    push dx           ; 传递参数
     call dword atoi
-    add sp, 4         ; 丢弃参数
-    pop ax
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
 [extern itoa_buf]
 sys_itoa:
-    mov ax, es
-    shl ax, 4
-    add ax, dx
-    push 0
-    push ax
-    push 0            ; 传递参数base
-    push 10           ; 传递参数base
-    push 0            ; 传递参数val
+    push es           ; 传递参数buf
+    push dx           ; 传递参数buf
+    mov ax, 0
+    push ax           ; 传递参数base
+    mov ax, 10        ; 10进制
+    push ax           ; 传递参数base
+    mov ax, 0
+    push ax           ; 传递参数val
     push bx           ; 传递参数val
     call dword itoa_buf
-    add sp, 12        ; 丢弃参数
+    pop bx            ; 丢弃参数
+    pop ax            ; 丢弃参数
+    pop ax            ; 丢弃参数
+    pop ax            ; 丢弃参数
+    pop dx            ; 丢弃参数
+    pop es            ; 丢弃参数
     ret
 
 [extern strlen]
 sys_printInPos:
     pusha
     mov bp, dx        ; es:bp=串地址
-    mov ax, es
-    shl ax, 4
-    add ax, dx
-    push 0            ; 传递参数
-    push ax           ; 传递参数
+    push es           ; 传递参数
+    push bp           ; 传递参数
     call dword strlen ; 返回值ax=串长
+    pop bp            ; 丢弃参数
+    pop es            ; 丢弃参数
     mov bl, 07h       ; 颜色
     mov dh, ch        ; 行号
     mov dl, cl        ; 列号
-    mov cx, 20        ; 串长
+    mov cx, ax        ; 串长
     mov bh, 0         ; 页码
     mov al, 0         ; 光标不动
     mov ah, 13h       ; BIOS功能号
     int 10h
-    add sp, 4         ; 丢弃参数
     popa
     ret
 
