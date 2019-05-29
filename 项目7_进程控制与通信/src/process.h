@@ -51,24 +51,19 @@ void pcb_init() {
 	}
 }
 
-PCB* get_current_pcb() {
+PCB* getCurrentPcb() {
     return &pcb_table[current_process_id];
 }
 
-PCB* get_pcb_table() {
+PCB* getPcbTable() {
     return &pcb_table[0];
 }
 
-// uint16_t debugtest() {
-//     return pcb_table[1].state;
-// }
-
-extern void powerOff();
 void pcbSchedule() {
-	get_current_pcb()->state = 1;
+	getCurrentPcb()->state = 1;
 	do {
 		current_process_id++;
 		if(current_process_id>7) current_process_id = 1;
-	} while(get_current_pcb()->state != 1);
-	get_current_pcb()->state = 2;
+	} while(getCurrentPcb()->state != 1);
+	getCurrentPcb()->state = 2;
 }

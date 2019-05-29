@@ -8,12 +8,10 @@ BITS 16
 [global Timer]
 [global timer_flag]
 [global loadProcessMem]
-global current_process_id
-extern get_current_pcb
-extern get_pcb_table
-extern pcbSchedule
-
-fuckcount dw 0
+[global current_process_id]
+[extern getCurrentPcb]
+[extern getPcbTable]
+[extern pcbSchedule]
 
 Timer:                                ; 08h号时钟中断处理程序
     cmp word[cs:timer_flag], 0
@@ -42,7 +40,7 @@ Timer:                                ; 08h号时钟中断处理程序
     call dword pcbSchedule            ; 进程调度
 
 PcbRestart:                           ; 不是函数
-    call dword get_current_pcb
+    call dword getCurrentPcb
     mov si, ax
     mov ax, [cs:si+0]
     mov cx, [cs:si+2]
@@ -80,7 +78,7 @@ pcbSave:                              ; 函数：现场保护
     mov bp, sp
     add bp, 16+2                      ; 参数首地址
 
-    call dword get_current_pcb
+    call dword getCurrentPcb
     mov di, ax
 
 
@@ -127,7 +125,7 @@ loadProcessMem:                       ; 函数：将某个用户程序加载入�
     add bp, 16+4                      ; 参数地址
     LOAD_TO_MEM [bp+12], [bp], [bp+4], [bp+8], [bp+16], [bp+20]
 
-    call dword get_pcb_table
+    call dword getPcbTable
     mov si, ax
     mov ax, 34
     mul word[bp+24]                   ; progid_to_run
@@ -153,7 +151,7 @@ resetAllPcbExceptZero:
     push si
     mov cx, 7                         ; 共8个PCB
 
-    call dword get_pcb_table
+    call dword getPcbTable
     mov si, ax
     add si, 34
 
@@ -182,8 +180,3 @@ resetAllPcbExceptZero:
     pop si
     pop cx
     ret
-
-debugfuck:                            ; 函数：强制关机
-    mov ax, 2001H
-    mov dx, 1004H
-    out dx, ax
