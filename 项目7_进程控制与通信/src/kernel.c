@@ -8,7 +8,8 @@
 #include "stringio.h"
 #include "process.h"
 #define BUFLEN 16
-#define OS_VERSION "1.4"
+#define OS_VERSION "1.5"
+#define OS_BUILDDATE "2019-05-29"
 
 extern void clearScreen();
 extern void powerOff();
@@ -37,7 +38,7 @@ void Delay()
 {
 	int i = 0;
 	int j = 0;
-	for( i=0;i<100000;i++ )
+	for( i=0;i<10000;i++ )
 		for( j=0;j<10000;j++ )
 		{
 			j++;
@@ -52,7 +53,7 @@ void startUp() {
     clearScreen();
     const char* title = "JedOS v" OS_VERSION;
     const char* subtitle = "Zhang Yixin, 17341203";
-    const char* date = "2019-05-04";
+    const char* date = OS_BUILDDATE;
     const char* hint = "System has been loaded successfully. Press ENTER to start shell.";
     printInPos(title, strlen(title), 5, 35);
     printInPos(subtitle, strlen(subtitle), 6, 29);

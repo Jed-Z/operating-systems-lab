@@ -24,9 +24,7 @@ start:
     push ds
     mov ax, 0
     mov es, ax
-    ; MOVE_INT_VECTOR 09h, 39h
-    ; WRITE_INT_VECTOR 09h, IntOuch
-    ; call ClearScreen       ; 清屏
+    call ClearScreen       ; 清屏
     mov ax,cs
     mov es,ax              ; ES = CS
     mov ds,ax              ; DS = CS
@@ -34,8 +32,6 @@ start:
     mov ax,0B800h
     mov gs,ax              ; GS = B800h，指向文本模式的显示缓冲区
     mov byte[char],'X'
-
-    ; PRINT_IN_POS hint1, hint1len, 16, 30
 
 initialize:                ; 多次调用用户程序时，可保证初始值是相同的
     mov word[x], originpos_x
@@ -195,8 +191,6 @@ continue:
     jmp loop1
 
 QuitUsrProg:
-    ; MOVE_INT_VECTOR 39h, 09h
-
     pop ds
     popa
     retf
