@@ -25,8 +25,8 @@ typedef struct PCB{
     uint8_t state;  // 33
 }PCB;
 
-PCB pcb_table[9];
-extern uint16_t current_process_id;
+extern PCB pcb_table[9];             // PCB表，定义在内核kernel.c中
+extern uint16_t current_process_id;  // 当前进程ID，定义在multiprocess.asm中
 
 void pcb_init() {
 	for(int i = 0; i < 9; i++) {
@@ -51,14 +51,17 @@ void pcb_init() {
 	}
 }
 
+/* 获取当前进程的PCB指针 */
 PCB* getCurrentPcb() {
     return &pcb_table[current_process_id];
 }
 
+/* 获取PCB表的首地址 */
 PCB* getPcbTable() {
     return &pcb_table[0];
 }
 
+/* 进程调度 */
 void pcbSchedule() {
 	getCurrentPcb()->state = 1;
 	do {
@@ -67,3 +70,4 @@ void pcbSchedule() {
 	} while(getCurrentPcb()->state != 1);
 	getCurrentPcb()->state = 2;
 }
+

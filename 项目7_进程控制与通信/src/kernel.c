@@ -2,14 +2,14 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-29
+ * @LastEditTime: 2019-05-31
  */
 #include <stdint.h>
 #include "stringio.h"
 #include "process.h"
 #define BUFLEN 16
 #define OS_VERSION "1.5"
-#define OS_BUILDDATE "2019-05-29"
+#define OS_BUILDDATE "2019-06-02"
 
 extern void clearScreen();
 extern void powerOff();
@@ -31,8 +31,9 @@ extern uint8_t getDateMinute();
 extern uint8_t getDateSecond();
 extern uint8_t bcd2decimal(uint8_t bcd);
 extern void loadProcessMem(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t seg, uint16_t offset, int progid_to_run);
-
 extern uint16_t timer_flag;
+
+PCB pcb_table[9];
 
 void Delay()
 {
@@ -169,10 +170,10 @@ void multiProcessing(char* cmdstr) {
             isvalid = 0;
             break;
         }
-        if(isnum(progids[i]) && progids[i]-'0'>4) {  // 只能运行前4个用户程序
-            isvalid = 0;
-            break;
-        }
+        // if(isnum(progids[i]) && progids[i]-'0'>4) {  // 只能运行前4个用户程序
+        //     isvalid = 0;
+        //     break;
+        // }
     }
     if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
         int i = 0;

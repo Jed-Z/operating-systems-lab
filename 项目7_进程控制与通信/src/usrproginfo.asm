@@ -16,8 +16,8 @@
     addr_off%1 dw %8         ; 内存地址偏移量；相对偏移24
 %endmacro                    ; 共26个字节
 
-UsrProgNumber:
-    db 6                     ; 用户程序数量
+UsrProgNumber:               ; 用户程序数量
+    db (SectorEnding-UserProgInfo) / 24
 
 UserProgInfo:
     UsrProgInfoBlock 1, 'stone_topleft',    1024, 1, 0, 1,  addr_usrprog1 >> 4 & 0F000h,    addr_usrprog1 & 0FFFFh
@@ -26,6 +26,7 @@ UserProgInfo:
     UsrProgInfoBlock 4, 'stone_botright',   1024, 1, 0, 7,  addr_usrprog4 >> 4 & 0F000h,    addr_usrprog4 & 0FFFFh
     UsrProgInfoBlock 5, 'interrupt_caller', 512,  1, 0, 9,  addr_intcaller >> 4 & 0F000h,   addr_intcaller & 0FFFFh
     UsrProgInfoBlock 6, 'syscall_test',     1536, 1, 0, 10, addr_syscalltest >> 4 & 0F000h, addr_syscalltest & 0FFFFh
+    UsrProgInfoBlock 7, 'fork_test',        1024,  1, 0, 13, addr_forktest >> 4 & 0F000h, addr_forktest & 0FFFFh
 
 SectorEnding:
     times 512-($-$$) db 0
