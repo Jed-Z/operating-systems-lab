@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-05-31
+ * @LastEditTime: 2019-06-02
  */
 #include <stdint.h>
 #include "stringio.h"
@@ -170,10 +170,10 @@ void multiProcessing(char* cmdstr) {
             isvalid = 0;
             break;
         }
-        // if(isnum(progids[i]) && progids[i]-'0'>4) {  // 只能运行前4个用户程序
-        //     isvalid = 0;
-        //     break;
-        // }
+        if(isnum(progids[i]) && progids[i]-'0'>4 && progids[i]-'0' != 7) {  // 只能运行前4个用户程序
+            isvalid = 0;
+            break;
+        }
     }
     if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
         int i = 0;
@@ -191,7 +191,7 @@ void multiProcessing(char* cmdstr) {
         print(hint);
     }
     else {  // 参数无效，报错，不执行任何用户程序
-        const char* error_msg = "Invalid arguments. ProgIDs must be numbers and less than or equal to 4.";
+        const char* error_msg = "Invalid arguments. Check your progIDs again.";
         print(error_msg);
         NEWLINE;
     }

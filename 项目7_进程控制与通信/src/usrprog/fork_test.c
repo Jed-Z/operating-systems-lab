@@ -50,8 +50,3 @@ void cmain()
     const char* ready = "ready to exit\r\n";
     print(ready);
 }
-
-// void cmain() {
-//     char* test = "This is a test message which is a little bit long long long long long ........................OVER!";
-//     print(test);
-// }

@@ -40,13 +40,13 @@ void pcb_init() {
 		pcb_table[i].regimg.bp = 0;
 		pcb_table[i].regimg.si = 0;
 		pcb_table[i].regimg.di = 0;
-		pcb_table[i].regimg.ds = i*0x1000;
-		pcb_table[i].regimg.es = i*0x1000;
-		pcb_table[i].regimg.fs = i*0x1000;
+		pcb_table[i].regimg.ds = 0;
+		pcb_table[i].regimg.es = 0;
+		pcb_table[i].regimg.fs = 0;
 		pcb_table[i].regimg.gs = 0xB800;
-		pcb_table[i].regimg.ss = i*0x1000;
+		pcb_table[i].regimg.ss = 0;
 		pcb_table[i].regimg.ip = 0;
-		pcb_table[i].regimg.cs = i*0x1000;
+		pcb_table[i].regimg.cs = 0;
 		pcb_table[i].regimg.flags = 512;
 	}
 }
