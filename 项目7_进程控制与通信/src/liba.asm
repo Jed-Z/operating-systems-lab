@@ -289,6 +289,7 @@ getDateSecond:                ; 函数：从CMOS获取当前秒钟
 [extern sys_printInPos]
 [extern sys_timer_flag]
 [extern sys_fork]
+; [extern sys_wait]
 syscaller:
     ; cli
     push ds
@@ -306,4 +307,4 @@ syscaller:
     sys_table:                ; 存放功能号与系统调用函数映射的表
         dw sys_showOuch, sys_toUpper, sys_toLower
         dw sys_atoi, sys_itoa, sys_printInPos, sys_timer_flag
-        dw sys_fork
+        dw sys_fork;, sys_wait

@@ -235,7 +235,7 @@ to_seg dw 0
 
 [global sys_fork]
 [extern do_fork]
-sys_fork:
+sys_fork:                          ; ah=07h, int 21h的处理函数
     push ss
     push gs
     push fs
@@ -254,8 +254,8 @@ sys_fork:
     mov es, ax                     ; es=ax，原因同上。注意此时尚未发生栈切换
     call pcbSave                   ; 将寄存器的值保存在PCB中
     add sp, 16*2                   ; 丢弃参数
-    call dword do_fork
 
+    call dword do_fork
 
 PcbRestart2:                       ; 不是函数
     call dword getCurrentPcb
@@ -280,3 +280,28 @@ PcbRestart2:                       ; 不是函数
     pop si                         ; 恢复si
 
     ret                            ; 退出sys_fork
+
+; [global sys_wait]
+; [extern do_wait]
+; sys_wait:
+;     push ss
+;     push gs
+;     push fs
+;     push es
+;     push ds
+;     push di
+;     push si
+;     push bp
+;     push sp
+;     push bx
+;     push dx
+;     push cx
+;     push ax
+;     mov ax, cs
+;     mov ds, ax                     ; ds=cs，因为函数中可能要用到ds
+;     mov es, ax                     ; es=ax，原因同上。注意此时尚未发生栈切换
+;     call pcbSave                   ; 将寄存器的值保存在PCB中
+;     add sp, 16*2                   ; 丢弃参数
+
+;     call dword do_wait
+;     ret

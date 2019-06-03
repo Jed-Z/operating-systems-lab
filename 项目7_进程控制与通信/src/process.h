@@ -31,7 +31,7 @@ typedef struct PCB{
     uint8_t state;  // 33
 }PCB;
 
-enum PCB_STATE {P_NEW, P_READY, P_RUNNING};
+enum PCB_STATE {P_NEW, P_READY, P_RUNNING, P_BLOCKED};
 extern PCB pcb_table[PROCESS_NUM];             // PCB表，定义在内核kernel.c中
 
 void pcb_init() {
@@ -73,7 +73,7 @@ void pcbSchedule() {
 	do {
 		current_process_id++;
 		if(current_process_id>7) current_process_id = 1;
-	} while(getCurrentPcb()->state != P_READY);
+	} while(getCurrentPcb()->state != P_READY || getCurrentPcb()->state == P_BLOCKED);
 	getCurrentPcb()->state = P_RUNNING;
 }
 
@@ -104,19 +104,23 @@ void initSubPcb(uint16_t sid) {
 }
 
 
-uint16_t do_fork() {
+void do_fork() {
 	uint16_t sid = 1;  // 子进程ID
 	for(sid = 1; sid < PROCESS_NUM; sid++) {
 		if(pcb_table[sid].state == P_NEW) break;
 	}
 	if(sid >= PROCESS_NUM || sid <= 0) {
 		getCurrentPcb()->regimg.ax = -1;  // fork失败，给父进程返回-1
-		return -1;
 	}
-
-	getCurrentPcb()->regimg.ax = sid;  // fork成功，给父进程返回子进程ID
-	initSubPcb(sid);  // 为子进程初始化PCB
-	copyStack();      // 拷贝父进程的栈到子进程的栈
-	pcb_table[sid].regimg.ax = 0;
-	return sid;
+	else {
+		getCurrentPcb()->regimg.ax = sid;  // fork成功，给父进程返回子进程ID
+		initSubPcb(sid);  // 为子进程初始化PCB
+		copyStack();      // 拷贝父进程的栈到子进程的栈
+		pcb_table[sid].regimg.ax = 0;
+	}
 }
+
+// void do_wait() {
+// 	getCurrentPcb()->state = P_BLOCKED;
+// 	pcbSchedule();
+// }
