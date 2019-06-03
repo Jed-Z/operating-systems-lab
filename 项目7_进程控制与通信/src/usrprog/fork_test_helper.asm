@@ -7,7 +7,8 @@ _start:
     int 10h         ; 中断调用，清屏
     PRINTLN welcome ; 打印欢迎信息
 
-    call do_fork
+    mov ah, 07h     ; 功能号：fork
+    int 21h         ; ax=fork的结果
     cmp ax, 0
     jl ForkFailure
     cmp ax, 0
@@ -24,14 +25,24 @@ ForkFailure:
 
 ForkParent:
     PRINTLN parent_say
-    call do_wait
-    PRINTLN result_1
+    ; call do_wait
+    ; PRINTLN result_1
+    ; mov ax, [letter_count]
+    ; add al, '0'
+    ; PUTCHAR al
+    ; PUTCHAR 0Dh
+    ; PUTCHAR 0Ah
     jmp continue
 
 ForkSon:
+
+    mov ax, 2001H
+    mov dx, 1004H
+    out dx, ax
+
     PRINTLN son_say
-    call countLetter
-    mov word[letter_count], ax
+    ; call countLetter
+    ; mov word[letter_count], ax
     jmp continue
 
 
@@ -54,5 +65,3 @@ DataArea:
     son_say db 'This is SON', 0Dh, 0Ah, 0
     error_fork db '[-] Error in fork!', 0Dh, 0Ah, 0
     result_1 db 'Letter number = ', 0
-
-%include "../fork.asm"

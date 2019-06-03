@@ -2,7 +2,7 @@
  * @Author: Jed
  * @Description: 内核的 C 函数部分
  * @Date: 2019-03-21
- * @LastEditTime: 2019-06-02
+ * @LastEditTime: 2019-06-03
  */
 #include <stdint.h>
 #include "stringio.h"
@@ -33,7 +33,7 @@ extern uint8_t bcd2decimal(uint8_t bcd);
 extern void loadProcessMem(uint8_t cylinder, uint8_t head, uint8_t sector, uint16_t len, uint16_t seg, uint16_t offset, int progid_to_run);
 extern uint16_t timer_flag;
 
-PCB pcb_table[9];
+PCB pcb_table[PROCESS_NUM];
 
 void Delay()
 {

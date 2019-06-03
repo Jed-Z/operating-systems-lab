@@ -1,4 +1,10 @@
 #include <stdint.h>
+#define PROCESS_NUM 8
+
+extern void copyStack();
+extern uint16_t current_process_id;  // 当前进程ID，定义在multiprocess.asm中
+extern uint16_t stack_length;
+extern uint16_t from_seg, to_seg;
 
 typedef struct RegisterImage{
 	uint16_t ax;     // 0
@@ -25,11 +31,11 @@ typedef struct PCB{
     uint8_t state;  // 33
 }PCB;
 
-extern PCB pcb_table[9];             // PCB表，定义在内核kernel.c中
-extern uint16_t current_process_id;  // 当前进程ID，定义在multiprocess.asm中
+enum PCB_STATE {P_NEW, P_READY, P_RUNNING};
+extern PCB pcb_table[PROCESS_NUM];             // PCB表，定义在内核kernel.c中
 
 void pcb_init() {
-	for(int i = 0; i < 9; i++) {
+	for(int i = 0; i < PROCESS_NUM; i++) {
 		pcb_table[i].id = i;
 		pcb_table[i].state = 0;
 		pcb_table[i].regimg.ax = 0;
@@ -63,11 +69,54 @@ PCB* getPcbTable() {
 
 /* 进程调度 */
 void pcbSchedule() {
-	getCurrentPcb()->state = 1;
+	getCurrentPcb()->state = P_READY;
 	do {
 		current_process_id++;
 		if(current_process_id>7) current_process_id = 1;
-	} while(getCurrentPcb()->state != 1);
-	getCurrentPcb()->state = 2;
+	} while(getCurrentPcb()->state != P_READY);
+	getCurrentPcb()->state = P_RUNNING;
 }
 
+void initSubPcb(uint16_t sid) {
+	pcb_table[sid].id = sid;
+	pcb_table[sid].state = P_READY;  // 设置子进程为就绪态
+	pcb_table[sid].regimg.ax = 0;    // 子进程的fork返回值=0
+	pcb_table[sid].regimg.cx = getCurrentPcb()->regimg.cx;
+	pcb_table[sid].regimg.dx = getCurrentPcb()->regimg.dx;
+	pcb_table[sid].regimg.bx = getCurrentPcb()->regimg.bx;
+	pcb_table[sid].regimg.sp = getCurrentPcb()->regimg.sp;
+	pcb_table[sid].regimg.bp = getCurrentPcb()->regimg.bp;
+	pcb_table[sid].regimg.si = getCurrentPcb()->regimg.si;
+	pcb_table[sid].regimg.di = getCurrentPcb()->regimg.di;
+	pcb_table[sid].regimg.ds = getCurrentPcb()->regimg.ds;
+	pcb_table[sid].regimg.es = getCurrentPcb()->regimg.es;
+	pcb_table[sid].regimg.fs = getCurrentPcb()->regimg.fs;
+	pcb_table[sid].regimg.gs = getCurrentPcb()->regimg.gs;
+	pcb_table[sid].regimg.ss = sid * 0x1000;  // 子进程的堆栈段
+	pcb_table[sid].regimg.ip = getCurrentPcb()->regimg.ip;
+	pcb_table[sid].regimg.cs = getCurrentPcb()->regimg.cs;
+	pcb_table[sid].regimg.flags = getCurrentPcb()->regimg.flags;
+
+	// stack_length = 0xFE00 - pcb_table[sid].regimg.sp;
+	stack_length = 0xFFFE;
+	from_seg = getCurrentPcb()->regimg.ss;
+	to_seg = pcb_table[sid].regimg.ss;
+}
+
+
+uint16_t do_fork() {
+	uint16_t sid = 1;  // 子进程ID
+	for(sid = 1; sid < PROCESS_NUM; sid++) {
+		if(pcb_table[sid].state == P_NEW) break;
+	}
+	if(sid >= PROCESS_NUM || sid <= 0) {
+		getCurrentPcb()->regimg.ax = -1;  // fork失败，给父进程返回-1
+		return -1;
+	}
+
+	getCurrentPcb()->regimg.ax = sid;  // fork成功，给父进程返回子进程ID
+	initSubPcb(sid);  // 为子进程初始化PCB
+	copyStack();      // 拷贝父进程的栈到子进程的栈
+	pcb_table[sid].regimg.ax = 0;
+	return sid;
+}

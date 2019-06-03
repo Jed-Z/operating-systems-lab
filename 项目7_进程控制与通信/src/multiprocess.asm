@@ -53,6 +53,13 @@ CheckEscKey:
 
 ContinucSchedule:
     call dword pcbSchedule         ; 进程调度
+pusha
+mov ax, [cs:current_process_id]
+add al, '0'
+mov bh, 0                          ; bh=页码
+mov ah, 0Eh                        ; 功能号：打印一个字符
+int 10h                            ; 打印字符
+popa
 
 PcbRestart:                        ; 不是函数
     call dword getCurrentPcb
@@ -73,7 +80,6 @@ PcbRestart:                        ; 不是函数
     push word[cs:si+30]            ; 新进程flags
     push word[cs:si+28]            ; 新进程cs
     push word[cs:si+26]            ; 新进程ip
-
     push word[cs:si+12]
     pop si                         ; 恢复si
 
@@ -165,11 +171,9 @@ resetAllPcbExceptZero:
     push cx
     push si
     mov cx, 7                      ; 共8个PCB
-
     call dword getPcbTable
     mov si, ax
     add si, 34
-
     loop1:
         mov word[cs:si+0], 0       ; ax
         mov word[cs:si+2], 0       ; cx
@@ -191,7 +195,88 @@ resetAllPcbExceptZero:
         mov byte[cs:si+33], 0      ; state=新建态
         add si, 34                 ; si指向下一个PCB
         loop loop1
-
     pop si
     pop cx
     ret
+
+
+[global copyStack]
+copyStack:
+    push ax
+    push es
+    push ds
+    push di
+    push si
+    push cx
+
+    mov ax, word[to_seg]           ; 子进程 ss
+    mov es,ax
+    mov di, 0
+    mov ax, word[from_seg]         ; 父进程 ss
+    mov ds, ax
+    mov si, 0
+    mov cx, word[stack_length]     ; 栈的大小
+    cld
+    rep movsw                      ; ds:si->es:di
+
+    pop cx
+    pop si
+    pop di
+    pop ds
+    pop es
+    pop ax
+    retf
+[global stack_length]
+[global from_seg]
+[global to_seg]
+stack_length dw 0
+from_seg dw 0
+to_seg dw 0
+
+[global sys_fork]
+[extern do_fork]
+sys_fork:
+    push ss
+    push gs
+    push fs
+    push es
+    push ds
+    push di
+    push si
+    push bp
+    push sp
+    push bx
+    push dx
+    push cx
+    push ax
+    mov ax, cs
+    mov ds, ax                     ; ds=cs，因为函数中可能要用到ds
+    mov es, ax                     ; es=ax，原因同上。注意此时尚未发生栈切换
+    call pcbSave                   ; 将寄存器的值保存在PCB中
+    add sp, 16*2                   ; 丢弃参数
+    call dword do_fork
+
+
+PcbRestart2:                       ; 不是函数
+    call dword getCurrentPcb
+    mov si, ax
+    mov ax, [cs:si+0]
+    mov cx, [cs:si+2]
+    mov dx, [cs:si+4]
+    mov bx, [cs:si+6]
+    mov sp, [cs:si+8]
+    mov bp, [cs:si+10]
+    mov di, [cs:si+14]
+    mov ds, [cs:si+16]
+    mov es, [cs:si+18]
+    mov fs, [cs:si+20]
+    mov gs, [cs:si+22]
+    mov ss, [cs:si+24]
+    add sp, 11*2                   ; 恢复正确的sp
+    push word[cs:si+30]            ; 新进程flags
+    push word[cs:si+28]            ; 新进程cs
+    push word[cs:si+26]            ; 新进程ip
+    push word[cs:si+12]
+    pop si                         ; 恢复si
+
+    ret                            ; 退出sys_fork
