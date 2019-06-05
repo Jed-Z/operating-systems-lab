@@ -134,7 +134,7 @@ void batch(char* cmdstr) {
             isvalid = 0;
             break;
         }
-        if(isnum(progids[i]) && progids[i]-'0'>getUsrProgNum()) {
+        if(isnum(progids[i]) && progids[i]-'0'>4) {
             isvalid = 0;
             break;
         }
@@ -170,10 +170,10 @@ void multiProcessing(char* cmdstr) {
             isvalid = 0;
             break;
         }
-        // if(isnum(progids[i]) && progids[i]-'0'>4 && progids[i]-'0' != 7) {  // 只能运行前4个用户程序
-        //     isvalid = 0;
-        //     break;
-        // }
+        if(isnum(progids[i]) && progids[i]-'0' > 4 && progids[i]-'0' != 6) {
+            isvalid = 0;
+            break;
+        }
     }
     if(isvalid) {  // 参数有效，则按顺序执行指定的用户程序
         int i = 0;
@@ -205,8 +205,6 @@ void shell() {
     char cmd_firstword[BUFLEN+1] = {0};  // 用于存放第一个空格之前的子串
     enum command             { help,   clear,   list,   bat,   run,   poweroff,    reboot,   date};
     const char* commands[] = {"help", "clear", "list", "bat", "run", "poweroff",  "reboot", "date"};
-//-----------------------------------
-//-----------------------------------
     while(1) {
         promptString();
         readToBuf(cmdstr, BUFLEN);
