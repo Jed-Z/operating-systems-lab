@@ -119,8 +119,3 @@ void do_fork() {
 		pcb_table[sid].regimg.ax = 0;
 	}
 }
-
-// void do_wait() {
-// 	getCurrentPcb()->state = P_BLOCKED;
-// 	pcbSchedule();
-// }
