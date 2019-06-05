@@ -27,12 +27,14 @@ ForkParent:         ; 父进程
     int 23h         ; 调用wait()
 
     PRINTLN finishbye
+    int 24h         ; 调用exit()
+
     jmp QuitUsrProg
 
 ForkSon:            ; 子进程
     PRINTLN son_say
     call countLetter
-    int 24h
+    int 24h         ; 调用exit()
     jmp QuitUsrProg
 
 
@@ -40,7 +42,7 @@ QuitUsrProg:
     jmp $
 
 countLetter:
-    mov ax, 8
+    mov word[letter_count], 8
     ret
 
 DataArea:

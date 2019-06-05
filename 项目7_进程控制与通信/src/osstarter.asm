@@ -11,12 +11,14 @@ BITS 16
 [extern Timer]
 [extern sys_fork]
 [extern sys_wait]
+[extern sys_exit]
 
 global _start
 _start:
     WRITE_INT_VECTOR 21h, syscaller ; 装填系统调用中断向量表
     WRITE_INT_VECTOR 22h, sys_fork
     WRITE_INT_VECTOR 23h, sys_wait
+    WRITE_INT_VECTOR 24h, sys_exit
 
 SetTimer:
     mov al,34h                      ; 设控制字值

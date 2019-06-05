@@ -9,6 +9,7 @@ BITS 16
 [global timer_flag]
 [global loadProcessMem]
 [global current_process_id]
+[global goBackToKernel]
 [extern getCurrentPcb]
 [extern getPcbTable]
 [extern pcbSchedule]
@@ -46,9 +47,7 @@ CheckEscKey:
     cmp al, 27                     ; 是否按下ESC
     jne ContinucSchedule           ; 若按下的不是ESC，继续调度
 
-    mov word[cs:current_process_id], 0
-    mov word[cs:timer_flag], 0     ; 禁止时钟中断处理多进程
-    call resetAllPcbExceptZero     ; 清理PCB
+    call goBackToKernel     ; 清理PCB
     jmp PcbRestart                 ; 通过恢复返回内核
 
 ContinucSchedule:
@@ -167,7 +166,7 @@ loadProcessMem:                    ; 函数：将某个用户程序加载入内�
     popa
     retf
 
-resetAllPcbExceptZero:
+goBackToKernel:
     push cx
     push si
     mov cx, 7                      ; 共8个PCB
@@ -195,6 +194,8 @@ resetAllPcbExceptZero:
         mov byte[cs:si+33], 0      ; state=新建态
         add si, 34                 ; si指向下一个PCB
         loop loop1
+    mov word[cs:current_process_id], 0
+    mov word[cs:timer_flag], 0     ; 禁止时钟中断处理多进程
     pop si
     pop cx
     ret
@@ -322,3 +323,51 @@ PcbRestart3:                       ; 不是函数
     pop si                         ; 恢复si
 
     iret                           ; 退出sys_wait
+
+
+[global sys_exit]
+[extern do_exit]
+sys_exit:
+    push ss
+    push gs
+    push fs
+    push es
+    push ds
+    push di
+    push si
+    push bp
+    push sp
+    push bx
+    push dx
+    push cx
+    push ax
+    mov ax, cs
+    mov ds, ax                     ; ds=cs，因为函数中可能要用到ds
+    mov es, ax                     ; es=ax，原因同上。注意此时尚未发生栈切换
+    call pcbSave                   ; 将寄存器的值保存在PCB中
+    add sp, 16*2                   ; 丢弃参数
+    call dword do_exit
+
+PcbRestart4:                       ; 不是函数
+    call dword getCurrentPcb
+    mov si, ax
+    mov ax, [cs:si+0]
+    mov cx, [cs:si+2]
+    mov dx, [cs:si+4]
+    mov bx, [cs:si+6]
+    mov sp, [cs:si+8]
+    mov bp, [cs:si+10]
+    mov di, [cs:si+14]
+    mov ds, [cs:si+16]
+    mov es, [cs:si+18]
+    mov fs, [cs:si+20]
+    mov gs, [cs:si+22]
+    mov ss, [cs:si+24]
+    add sp, 11*2                   ; 恢复正确的sp
+    push word[cs:si+30]            ; 新进程flags
+    push word[cs:si+28]            ; 新进程cs
+    push word[cs:si+26]            ; 新进程ip
+    push word[cs:si+12]
+    pop si                         ; 恢复si
+
+    iret                           ; 退出sys_exit

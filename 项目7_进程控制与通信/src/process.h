@@ -1,6 +1,7 @@
 #include <stdint.h>
 #define PROCESS_NUM 8
 
+extern void goBackToKernel();
 extern void copyStack();
 extern uint16_t current_process_id;  // 当前进程ID，定义在multiprocess.asm中
 extern uint16_t stack_length;
@@ -69,12 +70,18 @@ PCB* getPcbTable() {
 
 /* 进程调度 */
 void pcbSchedule() {
+	uint16_t privious_id = current_process_id;
 	getCurrentPcb()->state = P_READY;
 	do {
 		current_process_id++;
 		if(current_process_id>7) current_process_id = 1;
 	} while(getCurrentPcb()->state != P_READY);
 	getCurrentPcb()->state = P_RUNNING;
+
+	// 没有发现其它处于就绪态的进程，返回内核
+	// if(current_process_id == privious_id) {
+	// 	goBackToKernel();
+	// }
 }
 
 void initSubPcb(uint16_t sid) {
@@ -116,6 +123,7 @@ void do_fork() {
 		initSubPcb(sid);  // 为子进程初始化PCB
 		copyStack();      // 拷贝父进程的栈到子进程的栈
 		pcb_table[sid].regimg.ax = 0;
+		pcb_table[sid].id = current_process_id;
 	}
 }
 
@@ -123,4 +131,12 @@ void do_wait() {
 	PCB* to_be_blocked = getCurrentPcb();
 	pcbSchedule();
 	to_be_blocked->state = P_BLOCKED;
+}
+
+void do_exit() {
+	PCB* to_exit = getCurrentPcb();
+	getCurrentPcb()->state = P_NEW;
+	pcb_table[getCurrentPcb()->id].state = P_READY;
+	pcbSchedule();
+	to_exit->state = P_NEW;
 }
