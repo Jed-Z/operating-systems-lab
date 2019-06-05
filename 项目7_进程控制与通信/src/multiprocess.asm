@@ -173,7 +173,7 @@ resetAllPcbExceptZero:
     mov cx, 7                      ; 共8个PCB
     call dword getPcbTable
     mov si, ax
-    add si, 34
+    add si, 34                     ; 从pcb_table[1]开始
     loop1:
         mov word[cs:si+0], 0       ; ax
         mov word[cs:si+2], 0       ; cx
@@ -202,12 +202,9 @@ resetAllPcbExceptZero:
 
 [global copyStack]
 copyStack:
-    push ax
-    push es
+    pusha
     push ds
-    push di
-    push si
-    push cx
+    push es
 
     mov ax, word[to_seg]           ; 子进程 ss
     mov es,ax
@@ -219,13 +216,12 @@ copyStack:
     cld
     rep movsw                      ; ds:si->es:di
 
-    pop cx
-    pop si
-    pop di
-    pop ds
     pop es
-    pop ax
+    pop ds
+    popa
     retf
+
+    
 [global stack_length]
 [global from_seg]
 [global to_seg]
@@ -235,7 +231,7 @@ to_seg dw 0
 
 [global sys_fork]
 [extern do_fork]
-sys_fork:                          ; ah=07h, int 21h的处理函数
+sys_fork:
     push ss
     push gs
     push fs
@@ -254,7 +250,6 @@ sys_fork:                          ; ah=07h, int 21h的处理函数
     mov es, ax                     ; es=ax，原因同上。注意此时尚未发生栈切换
     call pcbSave                   ; 将寄存器的值保存在PCB中
     add sp, 16*2                   ; 丢弃参数
-
     call dword do_fork
 
 PcbRestart2:                       ; 不是函数
@@ -279,4 +274,51 @@ PcbRestart2:                       ; 不是函数
     push word[cs:si+12]
     pop si                         ; 恢复si
 
-    iret                            ; 退出sys_fork
+    iret                           ; 退出sys_fork
+
+[global sys_wait]
+[extern do_wait]
+sys_wait:
+    push ss
+    push gs
+    push fs
+    push es
+    push ds
+    push di
+    push si
+    push bp
+    push sp
+    push bx
+    push dx
+    push cx
+    push ax
+    mov ax, cs
+    mov ds, ax                     ; ds=cs，因为函数中可能要用到ds
+    mov es, ax                     ; es=ax，原因同上。注意此时尚未发生栈切换
+    call pcbSave                   ; 将寄存器的值保存在PCB中
+    add sp, 16*2                   ; 丢弃参数
+    call dword do_wait
+
+PcbRestart3:                       ; 不是函数
+    call dword getCurrentPcb
+    mov si, ax
+    mov ax, [cs:si+0]
+    mov cx, [cs:si+2]
+    mov dx, [cs:si+4]
+    mov bx, [cs:si+6]
+    mov sp, [cs:si+8]
+    mov bp, [cs:si+10]
+    mov di, [cs:si+14]
+    mov ds, [cs:si+16]
+    mov es, [cs:si+18]
+    mov fs, [cs:si+20]
+    mov gs, [cs:si+22]
+    mov ss, [cs:si+24]
+    add sp, 11*2                   ; 恢复正确的sp
+    push word[cs:si+30]            ; 新进程flags
+    push word[cs:si+28]            ; 新进程cs
+    push word[cs:si+26]            ; 新进程ip
+    push word[cs:si+12]
+    pop si                         ; 恢复si
+
+    iret                           ; 退出sys_wait

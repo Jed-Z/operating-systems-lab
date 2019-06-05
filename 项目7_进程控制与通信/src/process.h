@@ -73,7 +73,7 @@ void pcbSchedule() {
 	do {
 		current_process_id++;
 		if(current_process_id>7) current_process_id = 1;
-	} while(getCurrentPcb()->state != P_READY || getCurrentPcb()->state == P_BLOCKED);
+	} while(getCurrentPcb()->state != P_READY);
 	getCurrentPcb()->state = P_RUNNING;
 }
 
@@ -97,8 +97,7 @@ void initSubPcb(uint16_t sid) {
 	pcb_table[sid].regimg.cs = getCurrentPcb()->regimg.cs;
 	pcb_table[sid].regimg.flags = getCurrentPcb()->regimg.flags;
 
-	// stack_length = 0xFE00 - pcb_table[sid].regimg.sp;
-	stack_length = 0xFFFE;
+	stack_length = 0xFE00 - pcb_table[sid].regimg.sp;
 	from_seg = getCurrentPcb()->regimg.ss;
 	to_seg = pcb_table[sid].regimg.ss;
 }
@@ -118,4 +117,10 @@ void do_fork() {
 		copyStack();      // 拷贝父进程的栈到子进程的栈
 		pcb_table[sid].regimg.ax = 0;
 	}
+}
+
+void do_wait() {
+	PCB* to_be_blocked = getCurrentPcb();
+	pcbSchedule();
+	to_be_blocked->state = P_BLOCKED;
 }
