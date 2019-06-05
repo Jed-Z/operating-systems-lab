@@ -52,13 +52,13 @@ CheckEscKey:
 
 ContinucSchedule:
     call dword pcbSchedule         ; 进程调度
-pusha
-mov ax, [cs:current_process_id]
-add al, '0'
-mov bh, 0                          ; bh=页码
-mov ah, 0Eh                        ; 功能号：打印一个字符
-int 10h                            ; 打印字符
-popa
+; pusha
+; mov ax, [cs:current_process_id]
+; add al, '0'
+; mov bh, 0                          ; bh=页码
+; mov ah, 0Eh                        ; 功能号：打印一个字符
+; int 10h                            ; 打印字符
+; popa
 
 PcbRestart:                        ; 不是函数
     call dword getCurrentPcb

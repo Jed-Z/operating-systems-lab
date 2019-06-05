@@ -13,7 +13,7 @@ nasm stone_bottomleft.asm -o ../temp/stone_bottomleft.bin
 nasm stone_bottomright.asm -o ../temp/stone_bottomright.bin
 nasm interrupt_caller.asm -o ../temp/interrupt_caller.bin
 nasm syscall_test.asm -o ../temp/syscall_test.bin
-nasm fork_test_helper.asm -o ../temp/fork_test_helper.bin
+nasm fork_test.asm -o ../temp/fork_test.bin
 cd ..
 
 cd lib
@@ -37,7 +37,7 @@ dd if=./temp/stone_bottomleft.bin of=JedOS_v1.5.img bs=512 seek=40 count=2 2> /d
 dd if=./temp/stone_bottomright.bin of=JedOS_v1.5.img bs=512 seek=42 count=2 2> /dev/null
 dd if=./temp/interrupt_caller.bin of=JedOS_v1.5.img bs=512 seek=44 count=1 2> /dev/null
 dd if=./temp/syscall_test.bin of=JedOS_v1.5.img bs=512 seek=45 count=3 2> /dev/null
-dd if=./temp/fork_test_helper.bin of=JedOS_v1.5.img bs=512 seek=48 count=2 2> /dev/null
+dd if=./temp/fork_test.bin of=JedOS_v1.5.img bs=512 seek=48 count=2 2> /dev/null
 
 
 echo "[+] Done."
