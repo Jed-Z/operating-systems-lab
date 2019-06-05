@@ -18,11 +18,12 @@ _start:
     jmp QuitUsrProg
 
 
-ForkFailure:
+ForkFailure:                   ; ------ fork失败 ------
     PRINTLN error_fork
     jmp QuitUsrProg
 
-ForkParent:                    ; 父进程
+
+ForkParent:                    ; ------ 父进程 ------
     PRINTLN parent_say
     int 23h                    ; 调用wait()
 
@@ -35,22 +36,37 @@ ForkParent:                    ; 父进程
 
     jmp QuitUsrProg
 
-ForkSon:                       ; 子进程
+ForkSon:                       ; ------ 子进程 ------
     PRINTLN son_say
     call countLetter           ; 统计字母个数
     int 24h                    ; 调用exit()，退出子进程
     jmp QuitUsrProg
 
 
+
 QuitUsrProg:
     jmp $
 
 countLetter:                   ; 函数：统计the_str中的字母个数并保存在letter_count中
-    mov word[letter_count], 68 ; DEBUG：假设字母个数为68
+    pusha
+    mov si, the_str
+    loopCheck:
+        cmp byte[si], 0
+        je quitCountLetter
+        cmp byte[si], 'a'
+        jl loopContinue
+        cmp byte[si], 'z'
+        jg loopContinue
+        inc word[letter_count] ; 如果是小写字母则递增
+    loopContinue:
+        inc si
+        jmp loopCheck
+    quitCountLetter:
+    popa
     ret
 
 printLetterCount:              ; 函数：打印letter_count（默认为两位数）
-    push ax
+    pusha
     mov ax, [letter_count]
     mov bl, 10
     div bl                     ; al = ax/ah, ah = ax%ah
@@ -58,7 +74,7 @@ printLetterCount:              ; 函数：打印letter_count（默认为两位�
     add ah, '0'                ; 个位数的ASCII
     PUTCHAR al                 ; 打印十位数
     PUTCHAR ah                 ; 打印个位数
-    pop ax
+    popa
     ret
 
 DataArea:

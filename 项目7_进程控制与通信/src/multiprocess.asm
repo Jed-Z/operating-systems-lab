@@ -14,6 +14,29 @@ BITS 16
 [extern getPcbTable]
 [extern pcbSchedule]
 
+%macro  PCB_RESTART 0              ; 宏：从PCB中恢复寄存器的值
+    call dword getCurrentPcb
+    mov si, ax
+    mov ax, [cs:si+0]
+    mov cx, [cs:si+2]
+    mov dx, [cs:si+4]
+    mov bx, [cs:si+6]
+    mov sp, [cs:si+8]
+    mov bp, [cs:si+10]
+    mov di, [cs:si+14]
+    mov ds, [cs:si+16]
+    mov es, [cs:si+18]
+    mov fs, [cs:si+20]
+    mov gs, [cs:si+22]
+    mov ss, [cs:si+24]
+    add sp, 11*2                   ; 恢复正确的sp
+    push word[cs:si+30]            ; 新进程flags
+    push word[cs:si+28]            ; 新进程cs
+    push word[cs:si+26]            ; 新进程ip
+    push word[cs:si+12]
+    pop si                         ; 恢复si
+%endmacro
+
 Timer:                             ; 08h号时钟中断处理程序
     cmp word[cs:timer_flag], 0
     je QuitTimer
@@ -47,40 +70,13 @@ CheckEscKey:
     cmp al, 27                     ; 是否按下ESC
     jne ContinucSchedule           ; 若按下的不是ESC，继续调度
 
-    call goBackToKernel     ; 清理PCB
+    call goBackToKernel            ; 清理PCB
     jmp PcbRestart                 ; 通过恢复返回内核
 
 ContinucSchedule:
     call dword pcbSchedule         ; 进程调度
-; pusha
-; mov ax, [cs:current_process_id]
-; add al, '0'
-; mov bh, 0                          ; bh=页码
-; mov ah, 0Eh                        ; 功能号：打印一个字符
-; int 10h                            ; 打印字符
-; popa
-
-PcbRestart:                        ; 不是函数
-    call dword getCurrentPcb
-    mov si, ax
-    mov ax, [cs:si+0]
-    mov cx, [cs:si+2]
-    mov dx, [cs:si+4]
-    mov bx, [cs:si+6]
-    mov sp, [cs:si+8]
-    mov bp, [cs:si+10]
-    mov di, [cs:si+14]
-    mov ds, [cs:si+16]
-    mov es, [cs:si+18]
-    mov fs, [cs:si+20]
-    mov gs, [cs:si+22]
-    mov ss, [cs:si+24]
-    add sp, 11*2                   ; 恢复正确的sp
-    push word[cs:si+30]            ; 新进程flags
-    push word[cs:si+28]            ; 新进程cs
-    push word[cs:si+26]            ; 新进程ip
-    push word[cs:si+12]
-    pop si                         ; 恢复si
+PcbRestart:
+    PCB_RESTART                    ; 恢复寄存器
 
 QuitTimer:
     push ax
@@ -222,7 +218,7 @@ copyStack:
     popa
     retf
 
-    
+
 [global stack_length]
 [global from_seg]
 [global to_seg]
@@ -252,28 +248,7 @@ sys_fork:
     call pcbSave                   ; 将寄存器的值保存在PCB中
     add sp, 16*2                   ; 丢弃参数
     call dword do_fork
-
-PcbRestart2:                       ; 不是函数
-    call dword getCurrentPcb
-    mov si, ax
-    mov ax, [cs:si+0]
-    mov cx, [cs:si+2]
-    mov dx, [cs:si+4]
-    mov bx, [cs:si+6]
-    mov sp, [cs:si+8]
-    mov bp, [cs:si+10]
-    mov di, [cs:si+14]
-    mov ds, [cs:si+16]
-    mov es, [cs:si+18]
-    mov fs, [cs:si+20]
-    mov gs, [cs:si+22]
-    mov ss, [cs:si+24]
-    add sp, 11*2                   ; 恢复正确的sp
-    push word[cs:si+30]            ; 新进程flags
-    push word[cs:si+28]            ; 新进程cs
-    push word[cs:si+26]            ; 新进程ip
-    push word[cs:si+12]
-    pop si                         ; 恢复si
+    PCB_RESTART                    ; 恢复寄存器
 
     iret                           ; 退出sys_fork
 
@@ -299,28 +274,7 @@ sys_wait:
     call pcbSave                   ; 将寄存器的值保存在PCB中
     add sp, 16*2                   ; 丢弃参数
     call dword do_wait
-
-PcbRestart3:                       ; 不是函数
-    call dword getCurrentPcb
-    mov si, ax
-    mov ax, [cs:si+0]
-    mov cx, [cs:si+2]
-    mov dx, [cs:si+4]
-    mov bx, [cs:si+6]
-    mov sp, [cs:si+8]
-    mov bp, [cs:si+10]
-    mov di, [cs:si+14]
-    mov ds, [cs:si+16]
-    mov es, [cs:si+18]
-    mov fs, [cs:si+20]
-    mov gs, [cs:si+22]
-    mov ss, [cs:si+24]
-    add sp, 11*2                   ; 恢复正确的sp
-    push word[cs:si+30]            ; 新进程flags
-    push word[cs:si+28]            ; 新进程cs
-    push word[cs:si+26]            ; 新进程ip
-    push word[cs:si+12]
-    pop si                         ; 恢复si
+    PCB_RESTART                    ; 恢复寄存器
 
     iret                           ; 退出sys_wait
 
@@ -347,27 +301,6 @@ sys_exit:
     call pcbSave                   ; 将寄存器的值保存在PCB中
     add sp, 16*2                   ; 丢弃参数
     call dword do_exit
-
-PcbRestart4:                       ; 不是函数
-    call dword getCurrentPcb
-    mov si, ax
-    mov ax, [cs:si+0]
-    mov cx, [cs:si+2]
-    mov dx, [cs:si+4]
-    mov bx, [cs:si+6]
-    mov sp, [cs:si+8]
-    mov bp, [cs:si+10]
-    mov di, [cs:si+14]
-    mov ds, [cs:si+16]
-    mov es, [cs:si+18]
-    mov fs, [cs:si+20]
-    mov gs, [cs:si+22]
-    mov ss, [cs:si+24]
-    add sp, 11*2                   ; 恢复正确的sp
-    push word[cs:si+30]            ; 新进程flags
-    push word[cs:si+28]            ; 新进程cs
-    push word[cs:si+26]            ; 新进程ip
-    push word[cs:si+12]
-    pop si                         ; 恢复si
+    PCB_RESTART                    ; 恢复寄存器
 
     iret                           ; 退出sys_exit

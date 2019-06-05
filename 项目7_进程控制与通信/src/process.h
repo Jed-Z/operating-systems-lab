@@ -24,7 +24,7 @@ typedef struct RegisterImage{
 	uint16_t ip;     // 26
 	uint16_t cs;     // 28
 	uint16_t flags;  // 30
-}RegisterImage;
+} RegisterImage;
 
 typedef struct PCB{
 	RegisterImage regimg;
@@ -32,7 +32,7 @@ typedef struct PCB{
     uint8_t state;  // 33
 }PCB;
 
-enum PCB_STATE {P_NEW, P_READY, P_RUNNING, P_BLOCKED};
+enum PCB_STATE {P_NEW, P_READY, P_RUNNING, P_BLOCKED, P_EXIT};
 extern PCB pcb_table[PROCESS_NUM];             // PCB表，定义在内核kernel.c中
 
 void pcb_init() {
@@ -74,7 +74,7 @@ void pcbSchedule() {
 	getCurrentPcb()->state = P_READY;
 	do {
 		current_process_id++;
-		if(current_process_id>7) current_process_id = 1;
+		if(current_process_id >= PROCESS_NUM) current_process_id = 1;
 	} while(getCurrentPcb()->state != P_READY);
 	getCurrentPcb()->state = P_RUNNING;
 
@@ -123,7 +123,7 @@ void do_fork() {
 		initSubPcb(sid);  // 为子进程初始化PCB
 		copyStack();      // 拷贝父进程的栈到子进程的栈
 		pcb_table[sid].regimg.ax = 0;
-		pcb_table[sid].id = current_process_id;
+		pcb_table[sid].id = current_process_id;  // 父进程的ID
 	}
 }
 
@@ -135,8 +135,8 @@ void do_wait() {
 
 void do_exit() {
 	PCB* to_exit = getCurrentPcb();
-	getCurrentPcb()->state = P_NEW;
+	getCurrentPcb()->state = P_EXIT;
 	pcb_table[getCurrentPcb()->id].state = P_READY;
 	pcbSchedule();
-	to_exit->state = P_NEW;
+	to_exit->state = P_EXIT;
 }

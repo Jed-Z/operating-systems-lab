@@ -6,7 +6,7 @@ addr_usrprog2 equ 20000h    ; 四个普通用户程序的物理地址
 addr_usrprog3 equ 30000h    ; 四个普通用户程序的物理地址
 addr_usrprog4 equ 40000h    ; 四个普通用户程序的物理地址
 addr_intcaller equ 50000h
-addr_syscalltest equ 0B500h
+; addr_syscalltest equ 0B500h
 addr_forktest equ 60000h
 
 %macro WRITE_INT_VECTOR 2   ; 写中断向量表；参数：（中断号，中断处理程序地址）
