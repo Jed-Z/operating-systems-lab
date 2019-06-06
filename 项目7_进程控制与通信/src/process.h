@@ -1,3 +1,9 @@
+/*
+ * @Author: Jed
+ * @Description: PCB、进程调度、do_fork、do_wait、do_exit
+ * @Date: 2019-06-04
+ * @LastEditTime: 2019-06-06
+ */
 #include <stdint.h>
 #define PROCESS_NUM 8
 

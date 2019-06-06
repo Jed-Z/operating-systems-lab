@@ -1,7 +1,7 @@
 ; @Author: Jed
-; @Description: 多进程相关代码（纯汇编）
+; @Description: Timer、分时、多进程系统调用接口、寄存器的保存与恢复
 ; @Date: 2019-05-01
-; @LastEditTime: 2019-05-06
+; @LastEditTime: 2019-06-06
 BITS 16
 %include "macro.asm"
 

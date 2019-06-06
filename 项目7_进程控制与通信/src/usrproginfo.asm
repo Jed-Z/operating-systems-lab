@@ -1,7 +1,7 @@
 ; @Author: Jed
 ; @Description: 用户车呢光绪信息表。放在软盘第2个扇区。
 ; @Date: 2019-03-29
-; @LastEditTime: 2019-04-01
+; @LastEditTime: 2019-06-06
 
 %include "macro.asm"
 %macro UsrProgInfoBlock 8    ; 参数：(ProgID,程序名,字节数,柱面,磁头,扇区,内存地址)
