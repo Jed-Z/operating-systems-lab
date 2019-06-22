@@ -11,7 +11,6 @@ nasm stone_topleft.asm -o ../temp/stone_topleft.bin
 nasm stone_topright.asm -o ../temp/stone_topright.bin
 nasm stone_bottomleft.asm -o ../temp/stone_bottomleft.bin
 nasm stone_bottomright.asm -o ../temp/stone_bottomright.bin
-nasm interrupt_caller.asm -o ../temp/interrupt_caller.bin
 nasm fork_test.asm -o ../temp/fork_test.bin
 cd ..
 
@@ -27,15 +26,14 @@ gcc -fno-pie -c -m16 -march=i386 -masm=intel -ffreestanding -mpreferred-stack-bo
 ld -m elf_i386 -N -Ttext 0x8000 --oformat binary ./temp/osstarter.o ./temp/liba.o ./temp/kernel.o ./temp/systema.o ./temp/systemc.o ./temp/multiprocess.o -o ./temp/kernel.bin
 rm ./temp/*.o
 
-dd if=./temp/bootloader.bin of=JedOS_v1.5.img bs=512 count=1 2> /dev/null
-dd if=./temp/usrproginfo.bin of=JedOS_v1.5.img bs=512 seek=1 count=1 2> /dev/null
-dd if=./temp/kernel.bin of=JedOS_v1.5.img bs=512 seek=2 count=34 2> /dev/null
-dd if=./temp/stone_topleft.bin of=JedOS_v1.5.img bs=512 seek=36 count=2 2> /dev/null
-dd if=./temp/stone_topright.bin of=JedOS_v1.5.img bs=512 seek=38 count=2 2> /dev/null
-dd if=./temp/stone_bottomleft.bin of=JedOS_v1.5.img bs=512 seek=40 count=2 2> /dev/null
-dd if=./temp/stone_bottomright.bin of=JedOS_v1.5.img bs=512 seek=42 count=2 2> /dev/null
-dd if=./temp/interrupt_caller.bin of=JedOS_v1.5.img bs=512 seek=44 count=1 2> /dev/null
-dd if=./temp/fork_test.bin of=JedOS_v1.5.img bs=512 seek=48 count=2 2> /dev/null
+dd if=./temp/bootloader.bin of=JedOS_v1.6.img bs=512 count=1 2> /dev/null
+dd if=./temp/usrproginfo.bin of=JedOS_v1.6.img bs=512 seek=1 count=1 2> /dev/null
+dd if=./temp/kernel.bin of=JedOS_v1.6.img bs=512 seek=2 count=34 2> /dev/null
+dd if=./temp/stone_topleft.bin of=JedOS_v1.6.img bs=512 seek=36 count=2 2> /dev/null
+dd if=./temp/stone_topright.bin of=JedOS_v1.6.img bs=512 seek=38 count=2 2> /dev/null
+dd if=./temp/stone_bottomleft.bin of=JedOS_v1.6.img bs=512 seek=40 count=2 2> /dev/null
+dd if=./temp/stone_bottomright.bin of=JedOS_v1.6.img bs=512 seek=42 count=2 2> /dev/null
+dd if=./temp/fork_test.bin of=JedOS_v1.6.img bs=512 seek=48 count=2 2> /dev/null
 
 
 echo "[+] Done."

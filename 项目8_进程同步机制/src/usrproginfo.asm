@@ -24,8 +24,6 @@ UserProgInfo:
     UsrProgInfoBlock 2, 'stone_topright',   1024, 1, 0, 3,  addr_usrprog2 >> 4 & 0F000h,    addr_usrprog2 & 0FFFFh
     UsrProgInfoBlock 3, 'stone_botleft',    1024, 1, 0, 5,  addr_usrprog3 >> 4 & 0F000h,    addr_usrprog3 & 0FFFFh
     UsrProgInfoBlock 4, 'stone_botright',   1024, 1, 0, 7,  addr_usrprog4 >> 4 & 0F000h,    addr_usrprog4 & 0FFFFh
-    UsrProgInfoBlock 5, 'interrupt_caller', 512,  1, 0, 9,  addr_intcaller >> 4 & 0F000h,   addr_intcaller & 0FFFFh
-    ; UsrProgInfoBlock 6, 'syscall_test',     1536, 1, 0, 10, addr_syscalltest >> 4 & 0F000h, addr_syscalltest & 0FFFFh
     UsrProgInfoBlock 6, 'fork_test',        1024,  1, 0, 13, addr_forktest >> 4 & 0F000h, addr_forktest & 0FFFFh
 
 SectorEnding:

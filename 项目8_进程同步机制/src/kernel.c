@@ -8,8 +8,8 @@
 #include "stringio.h"
 #include "process.h"
 #define BUFLEN 16
-#define OS_VERSION "1.5"
-#define OS_BUILDDATE "2019-06-02"
+#define OS_VERSION "1.6"
+#define OS_BUILDDATE "2019-06-23"
 
 extern void clearScreen();
 extern void powerOff();
