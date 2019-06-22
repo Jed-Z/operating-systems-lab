@@ -5,7 +5,7 @@ addr_usrprog1 equ 10000h    ; 四个普通用户程序的物理地址
 addr_usrprog2 equ 20000h    ; 四个普通用户程序的物理地址
 addr_usrprog3 equ 30000h    ; 四个普通用户程序的物理地址
 addr_usrprog4 equ 40000h    ; 四个普通用户程序的物理地址
-addr_forktest equ 60000h
+addr_forktest equ 50000h
 
 %macro WRITE_INT_VECTOR 2   ; 写中断向量表；参数：（中断号，中断处理程序地址）
     push ax

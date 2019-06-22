@@ -24,7 +24,7 @@ UserProgInfo:
     UsrProgInfoBlock 2, 'stone_topright',   1024, 1, 0, 3,  addr_usrprog2 >> 4 & 0F000h,    addr_usrprog2 & 0FFFFh
     UsrProgInfoBlock 3, 'stone_botleft',    1024, 1, 0, 5,  addr_usrprog3 >> 4 & 0F000h,    addr_usrprog3 & 0FFFFh
     UsrProgInfoBlock 4, 'stone_botright',   1024, 1, 0, 7,  addr_usrprog4 >> 4 & 0F000h,    addr_usrprog4 & 0FFFFh
-    UsrProgInfoBlock 6, 'fork_test',        1024,  1, 0, 13, addr_forktest >> 4 & 0F000h, addr_forktest & 0FFFFh
+    UsrProgInfoBlock 5, 'fork_test',        1024,  1, 0, 13, addr_forktest >> 4 & 0F000h, addr_forktest & 0FFFFh
 
 SectorEnding:
     times 512-($-$$) db 0

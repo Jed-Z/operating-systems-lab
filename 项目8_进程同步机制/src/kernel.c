@@ -170,7 +170,7 @@ void multiProcessing(char* cmdstr) {
             isvalid = 0;
             break;
         }
-        if(isnum(progids[i]) && progids[i]-'0' > 4 && progids[i]-'0' != 6) {
+        if(isnum(progids[i]) && progids[i]-'0' > 5) {
             isvalid = 0;
             break;
         }
