@@ -258,7 +258,7 @@ QuitUsrProg:
 关键代码：
 
 ```assembly
-	mov ax,cs
+    mov ax,cs
     mov ds,ax                 ; DS = CS
     mov	ax,0B800h             ; 文本窗口显存起始地址
     mov	gs,ax                 ; GS = B800h
