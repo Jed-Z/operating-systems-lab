@@ -101,27 +101,27 @@ JedOS v1.5 的 shell 支持的命令见下表：
 
 ```c
 typedef struct RegisterImage{
-	uint16_t ax;     // 0
-	uint16_t cx;     // 2
-	uint16_t dx;     // 4
-	uint16_t bx;     // 6
-	uint16_t sp;     // 8
-	uint16_t bp;     // 10
-	uint16_t si;     // 12
-	uint16_t di;     // 14
-	uint16_t ds;     // 16
-	uint16_t es;     // 18
-	uint16_t fs;     // 20
-	uint16_t gs;     // 22
-	uint16_t ss;     // 24
-	uint16_t ip;     // 26
-	uint16_t cs;     // 28
-	uint16_t flags;  // 30
+    uint16_t ax;     // 0
+    uint16_t cx;     // 2
+    uint16_t dx;     // 4
+    uint16_t bx;     // 6
+    uint16_t sp;     // 8
+    uint16_t bp;     // 10
+    uint16_t si;     // 12
+    uint16_t di;     // 14
+    uint16_t ds;     // 16
+    uint16_t es;     // 18
+    uint16_t fs;     // 20
+    uint16_t gs;     // 22
+    uint16_t ss;     // 24
+    uint16_t ip;     // 26
+    uint16_t cs;     // 28
+    uint16_t flags;  // 30
 } RegisterImage;
 
 typedef struct PCB{
-	RegisterImage regimg;
-	uint8_t id;     // 32
+    RegisterImage regimg;
+    uint8_t id;     // 32
     uint8_t state;  // 33
 }PCB;
 ```
@@ -269,7 +269,7 @@ void do_fork() {
 
 
 
-`do_fork`内调用了`initSubPcb`，该函数初始化子进程的 PCB，其实是把父进程的 PCB 复制一份给子进程（除了 ax 寄存器和 ss 寄存器）。为了统一管理，我默认每个进程的堆栈段为 ID × 0x1000，如 6 号进程的堆栈段为 0x6000。在`initSubPcb`中，为`stack_length`、`from_seg`、`to_seg`三个全局变量赋值（这三个全局变量定义在`multiprocess.asm`中），分别为栈的大小、父进程的堆栈段、子进程的堆栈段，设置这些值是为后续栈拷贝做铺垫。
+`do_fork`内调用了`initSubPcb`，该函数初始化子进程的 PCB，其实是把父进程的 PCB 复制一份给子进程（除了 ax 寄存器和 ss 寄存器）。为了统一管理，规定每个进程的堆栈段为 ID × 0x1000，如 6 号进程的堆栈段为 0x6000。在`initSubPcb`中，为`stack_length`、`from_seg`、`to_seg`三个全局变量赋值（这三个全局变量定义在`multiprocess.asm`中），分别为栈的大小、父进程的堆栈段、子进程的堆栈段，设置这些值是为后续栈拷贝做铺垫。
 
 ```c
 void initSubPcb(uint16_t sid) {
@@ -545,7 +545,7 @@ echo "[+] Done."
 ### 警示与技巧
 
 * **逻辑地址、线性地址和物理地址。**在没有开启分页机制的情况下，线性地址就是物理地址。在本次实验中，仅用逻辑地址和物理地址。简单来讲，在 8086 中逻辑地址由 16 位的段值和 16 位的偏移量共同构成 20 位的物理地址。计算方法是，*将段值左移 4 位（乘以十进制的 16）再加上偏移量即的到物理地址*。一个物理地址可能由多个不同的逻辑地址表示，为了避免这种不唯一性，在我的实现中均认为段值的*低 12 位全为 0*。这样规定后，使用`phys_addr >> 4 & 0F000h`语句即可得到逻辑地址的段值。
-* **用户程序通过系统调用来执行内核过程**。由于 fork、wait、exit 过程实现在内核中，又因为用户程序和内核是分别独立编译的，因此用户程序不可能通过直接函数调用的方式调用这些过程。最好的方法是使用系统终端调用的方式——用户程序中使用`int`指令调用中断，然后由中断处理程序作为接口调用执行真正的`do_fork`、`do_wait`和`do_exit`。在进入中断程序时，必须要把当前进程的寄存器保存在 PCB 中，然后再进行其他处理，这样才能保证程序恢复执行时能够回到当初中断的位置。
+* **用户程序通过系统调用来执行内核过程**。由于 fork、wait、exit 过程实现在内核中，又因为用户程序和内核是分别独立编译的，因此用户程序不可能通过直接函数调用的方式调用这些过程。最好的方法是使用系统中断调用的方式——用户程序中使用`int`指令调用中断，然后由中断处理程序作为接口调用执行真正的`do_fork`、`do_wait`和`do_exit`。在进入中断程序时，必须要把当前进程的寄存器保存在 PCB 中，然后再进行其他处理，这样才能保证程序恢复执行时能够回到当初中断的位置。
 * **串操作指令**。16 位汇编中有`movsw`指令，以字（2 个字节）为单位进行串操作，从 [ds:si] 移动到 [es:di]，每次移动后，si 和 di 将会递增或递减 2 个单位。指针移动的方向由方向标志位 DF 决定，该标志位可以用`cld`和`std`设置。
 
 
