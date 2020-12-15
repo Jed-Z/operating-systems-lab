@@ -1,9 +1,8 @@
 # 操作系统原理实验
 
-*   中山大学（SYSU）
-*   数据科学与计算机学院（SDCS）
+*   中山大学计算机学院
 *   操作系统原理实验（Operating Systems Laboratory, DCS209）
-*   课程教师：凌应标
+*   教师：凌应标
 *   2019 春季学期（Spring 2019）
 
 作者：[Jed](https://www.jeddd.com/)
