@@ -1,12 +1,9 @@
-# 操作系统原理实验
+# 操作系统原理实验（课程项目）
 
 *   中山大学计算机学院
-*   操作系统原理实验（Operating Systems Laboratory, DCS209）
+*   操作系统原理实验（Operating Systems Laboratory, DCS218）
 *   教师：凌应标
-*   2019 春季学期（Spring 2019）
-
-作者：[Jed](https://www.jeddd.com/)
-
+*   2018-2019 学年第二学期（Spring 2019）
 
 
 ## 实验目录
@@ -23,17 +20,13 @@
 
 
 
-## 说明
+## 特色
 
 * GCC + NASM 实模式（16 位兼容的 32 位代码）；
-* Bash 脚本自动编译、链接、整合（非 Makefile）；
-* 功能朴素，无花里胡哨或高端效果；
-* 代码质量一般，未作工程化考量；
-* 仅在 VMware Workstation Pro 15 中测试软盘镜像；
-* 报告文档详细；
-* 成绩—时间性价比较高，期末最终成绩为 97 分；
-* 仅完成至实验 7。
-
+* 使用 Shell 脚本自动编译、链接、整合；
+* 未经美化的界面
+* 软盘镜像仅在 VMware Workstation Pro 15 中测试过；
+* 详细的实验报告文档。
 
 
 ## License
